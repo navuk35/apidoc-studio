@@ -92,7 +92,7 @@ export const RedocViewer: React.FC<RedocViewerProps> = ({ spec, theme = 'dark' }
           throw new Error('Invalid OpenAPI specification: missing version field');
         }
 
-        // Initialize Redoc with simplified options and proper white text colors
+        // Initialize Redoc with enhanced options to hide branding and improve display
         const options = {
           theme: theme === 'light' ? {
             colors: {
@@ -139,12 +139,18 @@ export const RedocViewer: React.FC<RedocViewerProps> = ({ spec, theme = 'dark' }
             }
           },
           scrollYOffset: 0,
-          hideDownloadButton: false,
+          hideDownloadButton: true,
+          hideLogo: true,
+          hideHostname: false,
           disableSearch: false,
           expandResponses: '200,201',
-          nativeScrollbars: false,
+          nativeScrollbars: true,
           hideNavigation: false,
-          stickyNavbar: true
+          stickyNavbar: true,
+          noAutoAuth: true,
+          pathInMiddlePanel: true,
+          hideSchemaPattern: true,
+          showExtensions: false
         };
 
         // Double-check Redoc is available
@@ -240,12 +246,42 @@ export const RedocViewer: React.FC<RedocViewerProps> = ({ spec, theme = 'dark' }
     <div className={`h-full w-full relative ${theme === 'light' ? 'bg-white' : 'bg-[#0F172A]'}`}>
       <div 
         ref={containerRef} 
-        className="h-full w-full relative z-0"
+        className="h-full w-full relative"
         style={{
           position: 'relative',
-          zIndex: 1
+          zIndex: 1,
+          overflow: 'auto'
         }}
       />
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          /* Hide Redoc branding and clean up the interface */
+          .redoc-wrap a[href*="redoc.ly"],
+          .redoc-wrap a[href*="redocly"],
+          [data-role="redoc-summary"] a[href*="redoc"],
+          .redoc-wrap .api-info-wrap a[href*="redoc"],
+          .redoc-footer,
+          .redoc-wrap footer {
+            display: none !important;
+          }
+          
+          /* Ensure proper scrolling */
+          .redoc-wrap,
+          .redoc-container {
+            height: 100% !important;
+            overflow: auto !important;
+          }
+          
+          /* Fix z-index issues */
+          .redoc-wrap .menu-content {
+            z-index: 5 !important;
+          }
+          
+          .redoc-wrap .dropdown {
+            z-index: 15 !important;
+          }
+        `
+      }} />
     </div>
   );
 };

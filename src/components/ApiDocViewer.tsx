@@ -13,7 +13,7 @@ import { FileUpload } from './FileUpload';
 import { YamlEditor } from './YamlEditor';
 import { TryItConsole } from './TryItConsole';
 import { RedocViewer } from './RedocViewer';
-import { Upload, FileText, Play, Settings, ChevronLeft, ChevronRight, PanelRightClose, PanelRightOpen, Menu, Plus, X } from 'lucide-react';
+import { Upload, FileText, Play, Settings, ChevronLeft, ChevronRight, PanelRightClose, PanelRightOpen, PanelLeftOpen, Menu, Plus, X } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface ApiSpec {
@@ -1016,36 +1016,31 @@ tags:
             </TabsContent>
 
             <TabsContent value="editor" className="m-0 h-full">
-              <div className="flex flex-1 overflow-hidden">
-                <div className={`${editorCollapsed ? 'w-0 overflow-hidden' : 'w-1/2'} border-r border-border transition-all duration-300 ease-in-out`}>
+              <div className="flex flex-1 overflow-hidden relative">
+                <div className={`${editorCollapsed ? 'w-0 overflow-hidden' : 'w-1/2'} border-r border-border transition-all duration-300 ease-in-out relative z-20`}>
                   <YamlEditor 
                     value={spec} 
                     onChange={handleSpecChange}
+                    onToggleVisibility={() => setEditorCollapsed(!editorCollapsed)}
+                    showToggleButton={!editorCollapsed}
                   />
                 </div>
-                <div className={`${editorCollapsed ? 'w-full' : 'w-1/2'} transition-all duration-300 ease-in-out overflow-hidden relative`}>
-                  {/* Toggle Editor Button - Always visible */}
-                  <div className="absolute top-4 right-4 z-10">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setEditorCollapsed(!editorCollapsed)}
-                      className="flex items-center gap-2 bg-background/80 backdrop-blur-sm border-border/50"
-                      title={editorCollapsed ? "Show Editor" : "Hide Editor"}
-                    >
-                      {editorCollapsed ? (
-                        <>
-                          <PanelRightOpen className="h-4 w-4" />
-                          Show Editor
-                        </>
-                      ) : (
-                        <>
-                          <PanelRightClose className="h-4 w-4" />
-                          Hide Editor
-                        </>
-                      )}
-                    </Button>
-                  </div>
+                <div className={`${editorCollapsed ? 'w-full' : 'w-1/2'} transition-all duration-300 ease-in-out overflow-hidden relative z-10`}>
+                  {/* Show Editor Button - Only visible when editor is collapsed */}
+                  {editorCollapsed && (
+                    <div className="absolute top-4 left-4 z-30">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setEditorCollapsed(false)}
+                        className="flex items-center gap-2 bg-background/90 backdrop-blur-sm border-border/50 shadow-md hover:bg-background"
+                        title="Show Editor"
+                      >
+                        <PanelLeftOpen className="h-4 w-4" />
+                        Show Editor
+                      </Button>
+                    </div>
+                  )}
                   <RedocViewer 
                     spec={parsedSpec} 
                     theme={theme}

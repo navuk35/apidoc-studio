@@ -3,13 +3,16 @@ import Editor from '@monaco-editor/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Save, Download, Check, AlertTriangle, X } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Save, Download, Check, AlertTriangle, X, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import * as yaml from 'js-yaml';
 
 interface YamlEditorProps {
   value: string;
   onChange: (value: string, parsed: any) => void;
+  onToggleVisibility?: () => void;
+  showToggleButton?: boolean;
 }
 
 interface ValidationError {
@@ -18,7 +21,7 @@ interface ValidationError {
   severity: 'error' | 'warning';
 }
 
-export const YamlEditor: React.FC<YamlEditorProps> = ({ value, onChange }) => {
+export const YamlEditor: React.FC<YamlEditorProps> = ({ value, onChange, onToggleVisibility, showToggleButton = false }) => {
   const [editorValue, setEditorValue] = useState(value);
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
   const [isValid, setIsValid] = useState(true);
@@ -176,7 +179,20 @@ export const YamlEditor: React.FC<YamlEditorProps> = ({ value, onChange }) => {
   }, [editorValue, handleEditorChange, toast]);
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col relative z-10">
+      {/* Toggle Button - Left Top */}
+      {showToggleButton && onToggleVisibility && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onToggleVisibility}
+          className="absolute top-2 left-2 z-20 bg-background/90 backdrop-blur-sm border-border/50 shadow-md hover:bg-background"
+          title="Hide Editor"
+        >
+          <PanelLeftClose className="h-4 w-4" />
+        </Button>
+      )}
+      
       {/* Editor Header */}
       <CardHeader className="h-16 flex-shrink-0 border-b border-border">
         <div className="flex items-center justify-between">
@@ -218,20 +234,22 @@ export const YamlEditor: React.FC<YamlEditorProps> = ({ value, onChange }) => {
       {/* Validation Errors */}
       {validationErrors.length > 0 && (
         <div className="flex-shrink-0 border-b border-border bg-muted/30">
-          <div className="p-3 space-y-2 max-h-32 overflow-y-auto">
-            {validationErrors.map((error, index) => (
-              <div key={index} className="flex items-start gap-2 text-sm">
-                {error.severity === 'error' ? (
-                  <X className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
-                ) : (
-                  <AlertTriangle className="h-4 w-4 text-status-warning mt-0.5 flex-shrink-0" />
-                )}
-                <span className={error.severity === 'error' ? 'text-destructive' : 'text-status-warning'}>
-                  Line {error.line}: {error.message}
-                </span>
-              </div>
-            ))}
-          </div>
+          <ScrollArea className="max-h-32">
+            <div className="p-3 space-y-2">
+              {validationErrors.map((error, index) => (
+                <div key={index} className="flex items-start gap-2 text-sm">
+                  {error.severity === 'error' ? (
+                    <X className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
+                  ) : (
+                    <AlertTriangle className="h-4 w-4 text-status-warning mt-0.5 flex-shrink-0" />
+                  )}
+                  <span className={error.severity === 'error' ? 'text-destructive' : 'text-status-warning'}>
+                    Line {error.line}: {error.message}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
         </div>
       )}
 
@@ -263,11 +281,14 @@ export const YamlEditor: React.FC<YamlEditorProps> = ({ value, onChange }) => {
             },
             overviewRulerLanes: 0,
             scrollbar: {
-              vertical: 'visible',
-              horizontal: 'visible',
-              useShadows: false,
-              verticalHasArrows: false,
-              horizontalHasArrows: false
+              vertical: 'auto',
+              horizontal: 'auto',
+              useShadows: true,
+              verticalHasArrows: true,
+              horizontalHasArrows: true,
+              alwaysConsumeMouseWheel: false,
+              verticalScrollbarSize: 14,
+              horizontalScrollbarSize: 14
             }
           }}
         />
