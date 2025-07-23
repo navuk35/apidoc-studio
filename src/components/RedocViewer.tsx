@@ -3,7 +3,6 @@ import { CardContent } from '@/components/ui/card';
 
 interface RedocViewerProps {
   spec: any;
-  hideNavigation?: boolean;
   theme?: 'light' | 'dark';
 }
 
@@ -13,7 +12,7 @@ declare global {
   }
 }
 
-export const RedocViewer: React.FC<RedocViewerProps> = ({ spec, hideNavigation = false, theme = 'dark' }) => {
+export const RedocViewer: React.FC<RedocViewerProps> = ({ spec, theme = 'dark' }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -98,12 +97,15 @@ export const RedocViewer: React.FC<RedocViewerProps> = ({ spec, hideNavigation =
           throw new Error('Invalid OpenAPI specification: missing version field');
         }
 
-        // Initialize Redoc with simplified options
+        // Initialize Redoc with simplified options and proper white text colors
         const options = {
           theme: theme === 'light' ? {
             colors: {
               primary: {
                 main: '#3B82F6'
+              },
+              text: {
+                primary: '#1F2937'
               }
             },
             sidebar: {
@@ -111,20 +113,34 @@ export const RedocViewer: React.FC<RedocViewerProps> = ({ spec, hideNavigation =
               textColor: '#374151'
             },
             rightPanel: {
-              backgroundColor: '#FFFFFF'
+              backgroundColor: '#FFFFFF',
+              textColor: '#1F2937'
             }
           } : {
             colors: {
               primary: {
                 main: '#3B82F6'
+              },
+              text: {
+                primary: '#FFFFFF'
+              },
+              background: {
+                primary: '#0F172A'
               }
             },
             sidebar: {
               backgroundColor: '#1F2937',
-              textColor: '#D1D5DB'
+              textColor: '#FFFFFF'
             },
             rightPanel: {
-              backgroundColor: '#111827'
+              backgroundColor: '#0F172A',
+              textColor: '#FFFFFF'
+            },
+            typography: {
+              color: '#FFFFFF',
+              headings: {
+                color: '#FFFFFF'
+              }
             }
           },
           scrollYOffset: 0,
@@ -132,7 +148,7 @@ export const RedocViewer: React.FC<RedocViewerProps> = ({ spec, hideNavigation =
           disableSearch: false,
           expandResponses: '200,201',
           nativeScrollbars: false,
-          hideNavigation: hideNavigation
+          hideNavigation: false
         };
 
         // Double-check Redoc is available
@@ -184,7 +200,7 @@ export const RedocViewer: React.FC<RedocViewerProps> = ({ spec, hideNavigation =
         containerRef.current.innerHTML = '';
       }
     };
-  }, [spec, hideNavigation, theme]);
+  }, [spec, theme]);
 
   if (!spec) {
     return (

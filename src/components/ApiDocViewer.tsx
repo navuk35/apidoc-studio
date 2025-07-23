@@ -5,11 +5,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
 import { FileUpload } from './FileUpload';
 import { YamlEditor } from './YamlEditor';
 import { TryItConsole } from './TryItConsole';
 import { RedocViewer } from './RedocViewer';
-import { Upload, FileText, Play, Settings, Eye, EyeOff, Sun, Moon, Server } from 'lucide-react';
+import { Upload, FileText, Play, Settings, Sun, Moon, Menu } from 'lucide-react';
 
 interface ApiDocViewerProps {}
 
@@ -17,9 +18,13 @@ export const ApiDocViewer: React.FC<ApiDocViewerProps> = () => {
   const [spec, setSpec] = useState<string>('');
   const [parsedSpec, setParsedSpec] = useState<any>(null);
   const [activeTab, setActiveTab] = useState('upload');
-  const [hideNavigation, setHideNavigation] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
-  const [mockServerEnabled, setMockServerEnabled] = useState(false);
+  const [menuVisibility, setMenuVisibility] = useState({
+    loadSpec: true,
+    documentation: true,
+    editor: true,
+    tryIt: true,
+  });
 
   // Load default sample spec on component mount
   React.useEffect(() => {
@@ -777,10 +782,75 @@ tags:
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm">
-                <Settings className="h-4 w-4" />
-                Settings
-              </Button>
+              <Drawer>
+                <DrawerTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Menu className="h-4 w-4" />
+                    Menu Options
+                  </Button>
+                </DrawerTrigger>
+                <DrawerContent>
+                  <div className="p-6 space-y-4">
+                    <h3 className="text-lg font-semibold">Menu Visibility</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          id="show-load-spec"
+                          checked={menuVisibility.loadSpec}
+                          onCheckedChange={(checked) =>
+                            setMenuVisibility(prev => ({ ...prev, loadSpec: checked }))
+                          }
+                        />
+                        <Label htmlFor="show-load-spec">Load Spec</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          id="show-documentation"
+                          checked={menuVisibility.documentation}
+                          onCheckedChange={(checked) =>
+                            setMenuVisibility(prev => ({ ...prev, documentation: checked }))
+                          }
+                        />
+                        <Label htmlFor="show-documentation">Documentation</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          id="show-editor"
+                          checked={menuVisibility.editor}
+                          onCheckedChange={(checked) =>
+                            setMenuVisibility(prev => ({ ...prev, editor: checked }))
+                          }
+                        />
+                        <Label htmlFor="show-editor">Editor</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          id="show-try-it"
+                          checked={menuVisibility.tryIt}
+                          onCheckedChange={(checked) =>
+                            setMenuVisibility(prev => ({ ...prev, tryIt: checked }))
+                          }
+                        />
+                        <Label htmlFor="show-try-it">Try It</Label>
+                      </div>
+                    </div>
+                    
+                    <div className="pt-4 border-t">
+                      <div className="flex items-center space-x-2">
+                        <Switch 
+                          id="theme-toggle" 
+                          checked={theme === 'light'} 
+                          onCheckedChange={(checked) => setTheme(checked ? 'light' : 'dark')}
+                        />
+                        <Label htmlFor="theme-toggle" className="flex items-center gap-2 text-sm font-medium">
+                          {theme === 'light' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                          {theme === 'light' ? 'Light' : 'Dark'} Theme
+                        </Label>
+                      </div>
+                    </div>
+                  </div>
+                </DrawerContent>
+              </Drawer>
             </div>
           </div>
         </div>
@@ -792,37 +862,45 @@ tags:
         <div className="w-64 border-r border-border bg-card/30 p-4">
           <Tabs value={activeTab} onValueChange={setActiveTab} orientation="vertical" className="w-full">
             <TabsList className="grid w-full grid-cols-1 gap-2 h-auto bg-transparent p-0">
-              <TabsTrigger 
-                value="upload" 
-                className="w-full justify-start gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-              >
-                <Upload className="h-4 w-4" />
-                Load Spec
-              </TabsTrigger>
-              <TabsTrigger 
-                value="viewer" 
-                className="w-full justify-start gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                disabled={!parsedSpec}
-              >
-                <FileText className="h-4 w-4" />
-                Documentation
-              </TabsTrigger>
-              <TabsTrigger 
-                value="editor" 
-                className="w-full justify-start gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                disabled={!spec}
-              >
-                <FileText className="h-4 w-4" />
-                Editor
-              </TabsTrigger>
-              <TabsTrigger 
-                value="tryit" 
-                className="w-full justify-start gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                disabled={!parsedSpec}
-              >
-                <Play className="h-4 w-4" />
-                Try It
-              </TabsTrigger>
+              {menuVisibility.loadSpec && (
+                <TabsTrigger 
+                  value="upload" 
+                  className="w-full justify-start gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                >
+                  <Upload className="h-4 w-4" />
+                  Load Spec
+                </TabsTrigger>
+              )}
+              {menuVisibility.documentation && (
+                <TabsTrigger 
+                  value="viewer" 
+                  className="w-full justify-start gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                  disabled={!parsedSpec}
+                >
+                  <FileText className="h-4 w-4" />
+                  Documentation
+                </TabsTrigger>
+              )}
+              {menuVisibility.editor && (
+                <TabsTrigger 
+                  value="editor" 
+                  className="w-full justify-start gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                  disabled={!spec}
+                >
+                  <FileText className="h-4 w-4" />
+                  Editor
+                </TabsTrigger>
+              )}
+              {menuVisibility.tryIt && (
+                <TabsTrigger 
+                  value="tryit" 
+                  className="w-full justify-start gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                  disabled={!parsedSpec}
+                >
+                  <Play className="h-4 w-4" />
+                  Try It
+                </TabsTrigger>
+              )}
             </TabsList>
           </Tabs>
         </div>
@@ -836,56 +914,10 @@ tags:
               </Card>
             </TabsContent>
 
-            <TabsContent value="viewer" className="m-0 h-full space-y-4">
-              <div className="flex items-center justify-between gap-4 p-4 bg-card rounded-lg border mx-4 mt-4">
-                <div className="flex items-center gap-6">
-                  <div className="flex items-center gap-2">
-                    <Switch 
-                      id="hide-nav" 
-                      checked={hideNavigation} 
-                      onCheckedChange={setHideNavigation}
-                    />
-                    <Label htmlFor="hide-nav" className="flex items-center gap-2 text-sm font-medium">
-                      {hideNavigation ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      {hideNavigation ? 'Show Navigation' : 'Hide Navigation'}
-                    </Label>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <Switch 
-                      id="theme-toggle" 
-                      checked={theme === 'light'} 
-                      onCheckedChange={(checked) => setTheme(checked ? 'light' : 'dark')}
-                    />
-                    <Label htmlFor="theme-toggle" className="flex items-center gap-2 text-sm font-medium">
-                      {theme === 'light' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-                      {theme === 'light' ? 'Light' : 'Dark'} Theme
-                    </Label>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <Switch 
-                      id="mock-server" 
-                      checked={mockServerEnabled} 
-                      onCheckedChange={setMockServerEnabled}
-                    />
-                    <Label htmlFor="mock-server" className="flex items-center gap-2 text-sm font-medium">
-                      <Server className="h-4 w-4" />
-                      Mock Server
-                    </Label>
-                    {mockServerEnabled && (
-                      <Badge variant="secondary" className="text-xs">
-                        Active
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-              </div>
-              
-              <div className="h-[calc(100%-5rem)] mx-4 mb-4">
+            <TabsContent value="viewer" className="m-0 h-full">
+              <div className="h-full mx-4 my-4">
                 <RedocViewer 
                   spec={parsedSpec} 
-                  hideNavigation={hideNavigation}
                   theme={theme}
                 />
               </div>
@@ -902,7 +934,6 @@ tags:
                 <div className="relative">
                   <RedocViewer 
                     spec={parsedSpec} 
-                    hideNavigation={hideNavigation}
                     theme={theme}
                   />
                 </div>
@@ -910,7 +941,7 @@ tags:
             </TabsContent>
 
             <TabsContent value="tryit" className="m-0 h-full">
-              <TryItConsole spec={parsedSpec} />
+              <TryItConsole spec={parsedSpec} theme={theme} />
             </TabsContent>
           </Tabs>
         </div>
