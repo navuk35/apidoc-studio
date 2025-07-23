@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
+import { Drawer, DrawerContent, DrawerTrigger, DrawerClose } from '@/components/ui/drawer';
 import { FileUpload } from './FileUpload';
 import { YamlEditor } from './YamlEditor';
 import { TryItConsole } from './TryItConsole';
@@ -786,63 +786,117 @@ tags:
                 <DrawerTrigger asChild>
                   <Button variant="outline" size="sm">
                     <Menu className="h-4 w-4" />
-                    Menu Options
                   </Button>
                 </DrawerTrigger>
                 <DrawerContent>
                   <div className="p-6 space-y-4">
-                    <h3 className="text-lg font-semibold">Menu Visibility</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="flex items-center space-x-2">
-                        <Switch
-                          id="show-load-spec"
-                          checked={menuVisibility.loadSpec}
-                          onCheckedChange={(checked) =>
-                            setMenuVisibility(prev => ({ ...prev, loadSpec: checked }))
-                          }
-                        />
-                        <Label htmlFor="show-load-spec">Load Spec</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Switch
-                          id="show-documentation"
-                          checked={menuVisibility.documentation}
-                          onCheckedChange={(checked) =>
-                            setMenuVisibility(prev => ({ ...prev, documentation: checked }))
-                          }
-                        />
-                        <Label htmlFor="show-documentation">Documentation</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Switch
-                          id="show-editor"
-                          checked={menuVisibility.editor}
-                          onCheckedChange={(checked) =>
-                            setMenuVisibility(prev => ({ ...prev, editor: checked }))
-                          }
-                        />
-                        <Label htmlFor="show-editor">Editor</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Switch
-                          id="show-try-it"
-                          checked={menuVisibility.tryIt}
-                          onCheckedChange={(checked) =>
-                            setMenuVisibility(prev => ({ ...prev, tryIt: checked }))
-                          }
-                        />
-                        <Label htmlFor="show-try-it">Try It</Label>
-                      </div>
+                    <h3 className="text-lg font-semibold">Navigation Menu</h3>
+                    <div className="grid gap-2">
+                      {menuVisibility.loadSpec && (
+                        <DrawerClose asChild>
+                          <Button
+                            variant="ghost"
+                            onClick={() => setActiveTab('upload')}
+                            className="justify-start gap-2"
+                          >
+                            <Upload className="h-4 w-4" />
+                            Load Spec
+                          </Button>
+                        </DrawerClose>
+                      )}
+                      {menuVisibility.documentation && (
+                        <DrawerClose asChild>
+                          <Button
+                            variant="ghost"
+                            onClick={() => setActiveTab('viewer')}
+                            disabled={!parsedSpec}
+                            className="justify-start gap-2"
+                          >
+                            <FileText className="h-4 w-4" />
+                            Documentation
+                          </Button>
+                        </DrawerClose>
+                      )}
+                      {menuVisibility.editor && (
+                        <DrawerClose asChild>
+                          <Button
+                            variant="ghost"
+                            onClick={() => setActiveTab('editor')}
+                            disabled={!spec}
+                            className="justify-start gap-2"
+                          >
+                            <FileText className="h-4 w-4" />
+                            Editor
+                          </Button>
+                        </DrawerClose>
+                      )}
+                      {menuVisibility.tryIt && (
+                        <DrawerClose asChild>
+                          <Button
+                            variant="ghost"
+                            onClick={() => setActiveTab('tryit')}
+                            disabled={!parsedSpec}
+                            className="justify-start gap-2"
+                          >
+                            <Play className="h-4 w-4" />
+                            Try It
+                          </Button>
+                        </DrawerClose>
+                      )}
                     </div>
                     
                     <div className="pt-4 border-t">
-                      <div className="flex items-center space-x-2">
+                      <h4 className="text-sm font-semibold mb-2">Menu Visibility</h4>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            id="show-load-spec"
+                            checked={menuVisibility.loadSpec}
+                            onCheckedChange={(checked) =>
+                              setMenuVisibility(prev => ({ ...prev, loadSpec: checked }))
+                            }
+                          />
+                          <Label htmlFor="show-load-spec" className="text-xs">Load Spec</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            id="show-documentation"
+                            checked={menuVisibility.documentation}
+                            onCheckedChange={(checked) =>
+                              setMenuVisibility(prev => ({ ...prev, documentation: checked }))
+                            }
+                          />
+                          <Label htmlFor="show-documentation" className="text-xs">Documentation</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            id="show-editor"
+                            checked={menuVisibility.editor}
+                            onCheckedChange={(checked) =>
+                              setMenuVisibility(prev => ({ ...prev, editor: checked }))
+                            }
+                          />
+                          <Label htmlFor="show-editor" className="text-xs">Editor</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            id="show-try-it"
+                            checked={menuVisibility.tryIt}
+                            onCheckedChange={(checked) =>
+                              setMenuVisibility(prev => ({ ...prev, tryIt: checked }))
+                            }
+                          />
+                          <Label htmlFor="show-try-it" className="text-xs">Try It</Label>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2 mt-3">
                         <Switch 
                           id="theme-toggle" 
                           checked={theme === 'light'} 
                           onCheckedChange={(checked) => setTheme(checked ? 'light' : 'dark')}
                         />
-                        <Label htmlFor="theme-toggle" className="flex items-center gap-2 text-sm font-medium">
+                        <Label htmlFor="theme-toggle" className="flex items-center gap-2 text-xs font-medium">
                           {theme === 'light' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
                           {theme === 'light' ? 'Light' : 'Dark'} Theme
                         </Label>
@@ -857,94 +911,44 @@ tags:
       </header>
 
       {/* Main Content */}
-      <div className="flex h-[calc(100vh-80px)]">
-        {/* Sidebar Navigation */}
-        <div className="w-64 border-r border-border bg-card/30 p-4">
-          <Tabs value={activeTab} onValueChange={setActiveTab} orientation="vertical" className="w-full">
-            <TabsList className="grid w-full grid-cols-1 gap-2 h-auto bg-transparent p-0">
-              {menuVisibility.loadSpec && (
-                <TabsTrigger 
-                  value="upload" 
-                  className="w-full justify-start gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                >
-                  <Upload className="h-4 w-4" />
-                  Load Spec
-                </TabsTrigger>
-              )}
-              {menuVisibility.documentation && (
-                <TabsTrigger 
-                  value="viewer" 
-                  className="w-full justify-start gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                  disabled={!parsedSpec}
-                >
-                  <FileText className="h-4 w-4" />
-                  Documentation
-                </TabsTrigger>
-              )}
-              {menuVisibility.editor && (
-                <TabsTrigger 
-                  value="editor" 
-                  className="w-full justify-start gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                  disabled={!spec}
-                >
-                  <FileText className="h-4 w-4" />
-                  Editor
-                </TabsTrigger>
-              )}
-              {menuVisibility.tryIt && (
-                <TabsTrigger 
-                  value="tryit" 
-                  className="w-full justify-start gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                  disabled={!parsedSpec}
-                >
-                  <Play className="h-4 w-4" />
-                  Try It
-                </TabsTrigger>
-              )}
-            </TabsList>
-          </Tabs>
-        </div>
+      <div className="h-[calc(100vh-80px)] bg-background">
+        <Tabs value={activeTab} className="h-full">
+          <TabsContent value="upload" className="m-0 h-full">
+            <Card className="h-full">
+              <FileUpload onSpecLoad={handleSpecLoad} />
+            </Card>
+          </TabsContent>
 
-        {/* Main Content Area */}
-        <div className="flex-1 bg-background">
-          <Tabs value={activeTab} className="h-full">
-            <TabsContent value="upload" className="m-0 h-full">
-              <Card className="h-full">
-                <FileUpload onSpecLoad={handleSpecLoad} />
-              </Card>
-            </TabsContent>
+          <TabsContent value="viewer" className="m-0 h-full">
+            <div className="h-full mx-4 my-4">
+              <RedocViewer 
+                spec={parsedSpec} 
+                theme={theme}
+              />
+            </div>
+          </TabsContent>
 
-            <TabsContent value="viewer" className="m-0 h-full">
-              <div className="h-full mx-4 my-4">
+          <TabsContent value="editor" className="m-0 h-full">
+            <div className="grid grid-cols-2 h-full">
+              <div className="border-r border-border">
+                <YamlEditor 
+                  value={spec} 
+                  onChange={handleSpecChange}
+                />
+              </div>
+              <div className="relative">
                 <RedocViewer 
                   spec={parsedSpec} 
                   theme={theme}
                 />
               </div>
-            </TabsContent>
+            </div>
+          </TabsContent>
 
-            <TabsContent value="editor" className="m-0 h-full">
-              <div className="grid grid-cols-2 h-full">
-                <div className="border-r border-border">
-                  <YamlEditor 
-                    value={spec} 
-                    onChange={handleSpecChange}
-                  />
-                </div>
-                <div className="relative">
-                  <RedocViewer 
-                    spec={parsedSpec} 
-                    theme={theme}
-                  />
-                </div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="tryit" className="m-0 h-full">
-              <TryItConsole spec={parsedSpec} theme={theme} />
-            </TabsContent>
-          </Tabs>
-        </div>
+          <TabsContent value="tryit" className="m-0 h-full">
+            <TryItConsole spec={parsedSpec} theme={theme} />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

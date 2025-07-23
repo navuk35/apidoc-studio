@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -56,6 +56,33 @@ export const TryItConsole: React.FC<TryItConsoleProps> = ({ spec, theme = 'dark'
 
   const currentOperation = selectedPath && selectedMethod && paths[selectedPath]?.[selectedMethod];
 
+  // Auto-load request body when operation changes
+  useEffect(() => {
+    if (currentOperation && ['post', 'put', 'patch'].includes(selectedMethod.toLowerCase())) {
+      const requestBodySchema = currentOperation.requestBody?.content?.['application/json']?.schema;
+      if (requestBodySchema && requestBodySchema.example) {
+        setRequestBody(JSON.stringify(requestBodySchema.example, null, 2));
+      } else if (requestBodySchema && requestBodySchema.properties) {
+        // Generate sample body from schema
+        const sampleBody: any = {};
+        Object.entries(requestBodySchema.properties).forEach(([key, prop]: [string, any]) => {
+          if (prop.example !== undefined) {
+            sampleBody[key] = prop.example;
+          } else if (prop.type === 'string') {
+            sampleBody[key] = prop.format === 'email' ? 'user@example.com' : 'string';
+          } else if (prop.type === 'number' || prop.type === 'integer') {
+            sampleBody[key] = 0;
+          } else if (prop.type === 'boolean') {
+            sampleBody[key] = true;
+          } else {
+            sampleBody[key] = null;
+          }
+        });
+        setRequestBody(JSON.stringify(sampleBody, null, 2));
+      }
+    }
+  }, [currentOperation, selectedMethod]);
+
   const getMethodColor = (method: string) => {
     switch (method.toLowerCase()) {
       case 'get': return 'bg-method-get text-white';
@@ -68,10 +95,10 @@ export const TryItConsole: React.FC<TryItConsoleProps> = ({ spec, theme = 'dark'
   };
 
   const getStatusColor = (status: number) => {
-    if (status >= 200 && status < 300) return 'bg-status-success text-white';
-    if (status >= 300 && status < 400) return 'bg-status-warning text-white';
-    if (status >= 400) return 'bg-status-error text-white';
-    return 'bg-muted';
+    if (status >= 200 && status < 300) return 'bg-green-600 text-white';
+    if (status >= 300 && status < 400) return 'bg-yellow-600 text-white';
+    if (status >= 400) return 'bg-red-600 text-white';
+    return 'bg-muted text-foreground';
   };
 
   const addParameter = useCallback((type: 'header' | 'query' | 'path') => {
@@ -266,8 +293,8 @@ export const TryItConsole: React.FC<TryItConsoleProps> = ({ spec, theme = 'dark'
       <div className="flex-1 overflow-hidden">
         <div className="grid grid-cols-2 h-full">
           {/* Request Panel */}
-          <div className="border-r border-border flex flex-col">
-            <CardContent className="flex-1 p-4 overflow-y-auto">
+          <div className="border-r border-border flex flex-col overflow-hidden">
+            <CardContent className="flex-1 p-4 overflow-y-auto max-h-full">
               <div className="space-y-4">
                 {/* Server Selection */}
                 <div className="space-y-2">
@@ -407,7 +434,7 @@ export const TryItConsole: React.FC<TryItConsoleProps> = ({ spec, theme = 'dark'
           </div>
 
           {/* Response Panel */}
-          <div className="flex flex-col">
+          <div className="flex flex-col overflow-hidden">
             <div className="flex-shrink-0 p-4 border-b border-border">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Response</h3>
