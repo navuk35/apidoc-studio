@@ -20,12 +20,7 @@ export const RedocViewer: React.FC<RedocViewerProps> = ({ spec, theme = 'dark' }
   useEffect(() => {
     if (!spec || !containerRef.current) {
       console.log('RedocViewer: No spec or container ref', { spec: !!spec, container: !!containerRef.current });
-      return;
-    }
-
-    // Don't reload if already loading
-    if (isLoading) {
-      console.log('RedocViewer: Already loading, skipping');
+      setIsLoading(false);
       return;
     }
 
