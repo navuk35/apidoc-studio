@@ -830,18 +830,10 @@ tags:
         {/* Main Content Area */}
         <div className="flex-1 bg-background">
           <Tabs value={activeTab} className="h-full">
-            <TabsContent value="upload" className="m-0 h-full p-6">
-              <div className="h-full flex items-center justify-center">
-                <div className="text-center space-y-4 max-w-md">
-                  <div className="h-24 w-24 mx-auto rounded-full bg-gradient-to-br from-primary/20 to-primary-glow/20 flex items-center justify-center">
-                    <Upload className="h-12 w-12 text-primary" />
-                  </div>
-                  <h2 className="text-2xl font-bold">Get Started</h2>
-                  <p className="text-muted-foreground">
-                    Upload your OpenAPI specification file or paste a URL to begin viewing and editing your API documentation.
-                  </p>
-                </div>
-              </div>
+            <TabsContent value="upload" className="m-0 h-full">
+              <Card className="h-full">
+                <FileUpload onSpecLoad={handleSpecLoad} />
+              </Card>
             </TabsContent>
 
             <TabsContent value="viewer" className="m-0 h-full space-y-4">
