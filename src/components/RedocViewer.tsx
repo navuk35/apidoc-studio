@@ -148,7 +148,8 @@ export const RedocViewer: React.FC<RedocViewerProps> = ({ spec, theme = 'dark' }
           disableSearch: false,
           expandResponses: '200,201',
           nativeScrollbars: false,
-          hideNavigation: false
+          hideNavigation: false,
+          stickyNavbar: true
         };
 
         // Double-check Redoc is available

@@ -773,10 +773,7 @@ tags:
     };
     setSpecs([defaultSpecObj]);
     setSelectedSpecId('default-ecommerce');
-    // Small delay to ensure state updates are processed
-    setTimeout(() => {
-      setActiveTab('viewer');
-    }, 100);
+    // Keep default tab as 'upload' (Load Spec)
   }, []);
 
   const handleSpecLoad = useCallback((newSpec: string, parsed: any) => {
@@ -882,7 +879,7 @@ tags:
       {/* Main Content */}
       <div className="flex h-[calc(100vh-80px)] flex-col md:flex-row">
         {/* Sidebar */}
-        <div className={`${sidebarCollapsed ? 'w-16' : 'w-64'} border-r border-border bg-card/30 transition-all duration-300 ease-in-out animate-slide-in-right flex flex-col hidden md:flex`}> 
+        <div className={`${sidebarCollapsed ? 'w-16' : 'w-64'} border-r border-border bg-card/30 transition-all duration-300 ease-in-out animate-slide-in-right flex flex-col hidden md:flex fixed h-[calc(100vh-80px)] z-10`}>
           {/* Sidebar Header with Toggle */}
           <div className="p-4 border-b border-border flex items-center justify-between">
             {!sidebarCollapsed && (
@@ -948,17 +945,8 @@ tags:
           <div className="p-4 border-t border-border">
             {!sidebarCollapsed && (
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center">
                   <h3 className="font-medium text-sm">API Specs</h3>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setActiveTab('upload')}
-                    className="h-6 w-6 p-0"
-                    title="Add new spec"
-                  >
-                    <Plus className="h-3 w-3" />
-                  </Button>
                 </div>
                 
                 {specs.length > 0 && (
@@ -1001,15 +989,6 @@ tags:
             
             {sidebarCollapsed && specs.length > 0 && (
               <div className="flex flex-col items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setActiveTab('upload')}
-                  className="h-8 w-8 p-0"
-                  title="Add new spec"
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
                 <span className="text-xs text-center font-mono bg-muted px-1 py-0.5 rounded">
                   {specs.length}
                 </span>
@@ -1019,7 +998,7 @@ tags:
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 bg-background animate-fade-in">
+        <div className={`flex-1 bg-background animate-fade-in ${sidebarCollapsed ? 'ml-16' : 'ml-64'} transition-all duration-300 ease-in-out`}>
           <Tabs value={activeTab} className="h-full">
             <TabsContent value="upload" className="m-0 h-full">
               <Card className="h-full">
@@ -1038,9 +1017,8 @@ tags:
 
             <TabsContent value="editor" className="m-0 h-full">
               <div className="flex flex-col h-full">
-                {/* Editor Controls */}
-                <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-card/50">
-                  <h3 className="font-medium text-sm">API Editor</h3>
+                {/* Hide Editor Control - Above the editor */}
+                <div className="flex items-center justify-end px-4 py-2 border-b border-border bg-card/50">
                   <Button
                     variant="outline"
                     size="sm"
