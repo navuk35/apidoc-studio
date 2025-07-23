@@ -20,13 +20,16 @@ export const RedocViewer: React.FC<RedocViewerProps> = ({ spec, theme = 'dark' }
   useEffect(() => {
     if (!spec || !containerRef.current) {
       console.log('RedocViewer: No spec or container ref', { spec: !!spec, container: !!containerRef.current });
-      setIsLoading(false);
       return;
     }
 
-    // Don't show loading if we're just updating the spec
-    const isInitialLoad = !window.Redoc;
-    setIsLoading(isInitialLoad);
+    // Don't reload if already loading or if the container already has content
+    if (isLoading || (containerRef.current.children.length > 0)) {
+      console.log('RedocViewer: Already loading or content exists, skipping');
+      return;
+    }
+
+    setIsLoading(true);
     setError(null);
     console.log('RedocViewer: Starting to load Redoc for spec:', spec?.info?.title || 'Unknown API');
 
@@ -94,7 +97,7 @@ export const RedocViewer: React.FC<RedocViewerProps> = ({ spec, theme = 'dark' }
           throw new Error('Invalid OpenAPI specification: missing version field');
         }
 
-        // Initialize Redoc with enhanced options to hide branding and improve display
+        // Initialize Redoc with simplified options and proper white text colors
         const options = {
           theme: theme === 'light' ? {
             colors: {
@@ -141,18 +144,12 @@ export const RedocViewer: React.FC<RedocViewerProps> = ({ spec, theme = 'dark' }
             }
           },
           scrollYOffset: 0,
-          hideDownloadButton: true,
-          hideLogo: true,
-          hideHostname: false,
+          hideDownloadButton: false,
           disableSearch: false,
           expandResponses: '200,201',
-          nativeScrollbars: true,
+          nativeScrollbars: false,
           hideNavigation: false,
-          stickyNavbar: true,
-          noAutoAuth: true,
-          pathInMiddlePanel: true,
-          hideSchemaPattern: true,
-          showExtensions: false
+          stickyNavbar: true
         };
 
         // Double-check Redoc is available
@@ -160,22 +157,9 @@ export const RedocViewer: React.FC<RedocViewerProps> = ({ spec, theme = 'dark' }
           throw new Error('Redoc.init is not available');
         }
 
-        // Initialize Redoc with sticky navigation
+        // Initialize Redoc
         window.Redoc.init(spec, options, redocDiv);
         console.log('RedocViewer: Redoc initialized successfully');
-        
-        // Preserve navigation scroll position after rendering
-        setTimeout(() => {
-          const menuContent = redocDiv.querySelector('.menu-content') as HTMLElement;
-          if (menuContent) {
-            menuContent.style.position = 'sticky';
-            menuContent.style.top = '0';
-            menuContent.style.height = '100vh';
-            menuContent.style.overflowY = 'auto';
-            menuContent.style.zIndex = '10';
-          }
-        }, 500);
-        
         setIsLoading(false);
         
       } catch (error) {
@@ -261,51 +245,12 @@ export const RedocViewer: React.FC<RedocViewerProps> = ({ spec, theme = 'dark' }
     <div className={`h-full w-full relative ${theme === 'light' ? 'bg-white' : 'bg-[#0F172A]'}`}>
       <div 
         ref={containerRef} 
-        className="h-full w-full relative"
+        className="h-full w-full relative z-0"
         style={{
           position: 'relative',
-          zIndex: 1,
-          overflow: 'auto'
+          zIndex: 1
         }}
       />
-      <style dangerouslySetInnerHTML={{
-        __html: `
-          /* Hide Redoc branding and clean up the interface */
-          .redoc-wrap a[href*="redoc.ly"],
-          .redoc-wrap a[href*="redocly"],
-          [data-role="redoc-summary"] a[href*="redoc"],
-          .redoc-wrap .api-info-wrap a[href*="redoc"],
-          .redoc-footer,
-          .redoc-wrap footer {
-            display: none !important;
-          }
-          
-          /* Ensure proper scrolling */
-          .redoc-wrap,
-          .redoc-container {
-            height: 100% !important;
-            overflow: auto !important;
-          }
-          
-          /* Fix z-index and sticky navigation */
-          .redoc-wrap .menu-content {
-            position: sticky !important;
-            top: 0 !important;
-            height: 100vh !important;
-            overflow-y: auto !important;
-            z-index: 10 !important;
-          }
-          
-          .redoc-wrap .dropdown {
-            z-index: 15 !important;
-          }
-          
-          /* Keep menu visible during spec changes */
-          .redoc-wrap .menu-content .scrollbar-container {
-            height: 100% !important;
-          }
-        `
-      }} />
     </div>
   );
 };

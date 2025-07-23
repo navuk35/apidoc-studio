@@ -7,7 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
-import { Play, Copy, Trash2, Plus, X, RotateCcw } from 'lucide-react';
+import { Play, Copy, Trash2, Plus, X, Server, RotateCcw } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 
 interface TryItConsoleProps {
@@ -37,6 +38,7 @@ export const TryItConsole: React.FC<TryItConsoleProps> = ({ spec, theme = 'dark'
   const [requestBody, setRequestBody] = useState('');
   const [response, setResponse] = useState<ApiResponse | null>(null);
   const [loading, setLoading] = useState(false);
+  const [mockServerEnabled, setMockServerEnabled] = useState(false);
   const { toast } = useToast();
 
   // Extract servers from spec
@@ -334,8 +336,37 @@ export const TryItConsole: React.FC<TryItConsoleProps> = ({ spec, theme = 'dark'
               <RotateCcw className="h-4 w-4" />
               Reset
             </Button>
+            <div className="flex items-center gap-2">
+              <Switch 
+                id="mock-server" 
+                checked={mockServerEnabled} 
+                onCheckedChange={setMockServerEnabled}
+              />
+              <Label htmlFor="mock-server" className="flex items-center gap-2 text-sm font-medium">
+                <Server className="h-4 w-4" />
+                Mock Server
+              </Label>
+              {mockServerEnabled && (
+                <Badge variant="secondary" className="text-xs">
+                  Active
+                </Badge>
+              )}
+            </div>
           </div>
         </div>
+        {mockServerEnabled && (
+          <div className="mt-3 p-3 bg-muted/50 rounded-lg">
+            <h4 className="font-medium text-sm mb-2">Mock Server Configuration</h4>
+            <p className="text-xs text-muted-foreground mb-2">
+              Mock server is enabled. Requests will return sample responses based on your OpenAPI specification.
+            </p>
+            <div className="text-xs space-y-1">
+              <p><strong>Base URL:</strong> {selectedServer || 'No server selected'}</p>
+              <p><strong>Status:</strong> <span className="text-green-500">Active</span></p>
+              <p><strong>Response Type:</strong> JSON samples from schema</p>
+            </div>
+          </div>
+        )}
       </CardHeader>
 
       <div className="flex-1 overflow-hidden">
@@ -350,9 +381,11 @@ export const TryItConsole: React.FC<TryItConsoleProps> = ({ spec, theme = 'dark'
                   <Input
                     value={selectedServer}
                     onChange={(e) => setSelectedServer(e.target.value)}
-                    placeholder="Enter server URL (e.g., https://api.example.com)"
+                    placeholder={mockServerEnabled ? "Mock server active" : "Enter server URL (e.g., https://api.example.com)"}
+                    disabled={mockServerEnabled}
+                    className={mockServerEnabled ? "opacity-60" : ""}
                   />
-                  {servers.length > 0 && (
+                  {!mockServerEnabled && servers.length > 0 && (
                     <div className="text-xs text-muted-foreground">
                       <p className="mb-1">Suggested servers:</p>
                       <div className="flex flex-wrap gap-1">

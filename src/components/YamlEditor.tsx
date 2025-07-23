@@ -3,16 +3,13 @@ import Editor from '@monaco-editor/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Save, Download, Check, AlertTriangle, X, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { Save, Download, Check, AlertTriangle, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import * as yaml from 'js-yaml';
 
 interface YamlEditorProps {
   value: string;
   onChange: (value: string, parsed: any) => void;
-  onToggleVisibility?: () => void;
-  showToggleButton?: boolean;
 }
 
 interface ValidationError {
@@ -179,10 +176,9 @@ export const YamlEditor: React.FC<YamlEditorProps> = ({ value, onChange }) => {
   }, [editorValue, handleEditorChange, toast]);
 
   return (
-    <div className="h-full flex flex-col relative z-10">
-      
+    <div className="h-full flex flex-col">
       {/* Editor Header */}
-      <CardHeader className="h-16 flex-shrink-0 border-b border-border">
+      <CardHeader className="flex-shrink-0 border-b border-border">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <CardTitle className="text-lg">YAML Editor</CardTitle>
@@ -222,22 +218,20 @@ export const YamlEditor: React.FC<YamlEditorProps> = ({ value, onChange }) => {
       {/* Validation Errors */}
       {validationErrors.length > 0 && (
         <div className="flex-shrink-0 border-b border-border bg-muted/30">
-          <ScrollArea className="max-h-32">
-            <div className="p-3 space-y-2">
-              {validationErrors.map((error, index) => (
-                <div key={index} className="flex items-start gap-2 text-sm">
-                  {error.severity === 'error' ? (
-                    <X className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
-                  ) : (
-                    <AlertTriangle className="h-4 w-4 text-status-warning mt-0.5 flex-shrink-0" />
-                  )}
-                  <span className={error.severity === 'error' ? 'text-destructive' : 'text-status-warning'}>
-                    Line {error.line}: {error.message}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </ScrollArea>
+          <div className="p-3 space-y-2 max-h-32 overflow-y-auto">
+            {validationErrors.map((error, index) => (
+              <div key={index} className="flex items-start gap-2 text-sm">
+                {error.severity === 'error' ? (
+                  <X className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
+                ) : (
+                  <AlertTriangle className="h-4 w-4 text-status-warning mt-0.5 flex-shrink-0" />
+                )}
+                <span className={error.severity === 'error' ? 'text-destructive' : 'text-status-warning'}>
+                  Line {error.line}: {error.message}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
@@ -269,14 +263,11 @@ export const YamlEditor: React.FC<YamlEditorProps> = ({ value, onChange }) => {
             },
             overviewRulerLanes: 0,
             scrollbar: {
-              vertical: 'auto',
-              horizontal: 'auto',
-              useShadows: true,
-              verticalHasArrows: true,
-              horizontalHasArrows: true,
-              alwaysConsumeMouseWheel: false,
-              verticalScrollbarSize: 14,
-              horizontalScrollbarSize: 14
+              vertical: 'visible',
+              horizontal: 'visible',
+              useShadows: false,
+              verticalHasArrows: false,
+              horizontalHasArrows: false
             }
           }}
         />
