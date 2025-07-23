@@ -3,13 +3,15 @@ import Editor from '@monaco-editor/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Save, Download, Check, AlertTriangle, X } from 'lucide-react';
+import { Save, Download, Check, AlertTriangle, X, PanelRightClose, PanelRightOpen } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import * as yaml from 'js-yaml';
 
 interface YamlEditorProps {
   value: string;
   onChange: (value: string, parsed: any) => void;
+  onToggleEditor?: () => void;
+  editorCollapsed?: boolean;
 }
 
 interface ValidationError {
@@ -18,7 +20,7 @@ interface ValidationError {
   severity: 'error' | 'warning';
 }
 
-export const YamlEditor: React.FC<YamlEditorProps> = ({ value, onChange }) => {
+export const YamlEditor: React.FC<YamlEditorProps> = ({ value, onChange, onToggleEditor, editorCollapsed }) => {
   const [editorValue, setEditorValue] = useState(value);
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
   const [isValid, setIsValid] = useState(true);
@@ -178,9 +180,30 @@ export const YamlEditor: React.FC<YamlEditorProps> = ({ value, onChange }) => {
   return (
     <div className="h-full flex flex-col">
       {/* Editor Header */}
-      <CardHeader className="flex-shrink-0 border-b border-border">
+      <CardHeader className="h-16 flex-shrink-0 border-b border-border">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
+            {onToggleEditor && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onToggleEditor}
+                className="flex items-center gap-2"
+                title={editorCollapsed ? "Show Editor" : "Hide Editor"}
+              >
+                {editorCollapsed ? (
+                  <>
+                    <PanelRightOpen className="h-4 w-4" />
+                    Show
+                  </>
+                ) : (
+                  <>
+                    <PanelRightClose className="h-4 w-4" />
+                    Hide
+                  </>
+                )}
+              </Button>
+            )}
             <CardTitle className="text-lg">YAML Editor</CardTitle>
             <div className="flex items-center gap-2">
               {isValid ? (

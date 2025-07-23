@@ -879,9 +879,9 @@ tags:
       {/* Main Content */}
       <div className="flex h-[calc(100vh-80px)] flex-col md:flex-row">
         {/* Sidebar */}
-        <div className={`${sidebarCollapsed ? 'w-16' : 'w-64'} border-r border-border bg-card/30 transition-all duration-300 ease-in-out animate-slide-in-right flex flex-col hidden md:flex fixed h-[calc(100vh-80px)] z-10`}>
+        <div className={`${sidebarCollapsed ? 'w-16' : 'w-64'} border-r border-border bg-card/30 transition-all duration-300 ease-in-out animate-slide-in-right flex flex-col hidden md:flex fixed h-[calc(100vh-80px)] z-20`}>
           {/* Sidebar Header with Toggle */}
-          <div className="p-4 border-b border-border flex items-center justify-between">
+          <div className="h-16 p-4 border-b border-border flex items-center justify-between">
             {!sidebarCollapsed && (
               <h2 className="font-semibold text-sm">Navigation</h2>
             )}
@@ -1016,44 +1016,20 @@ tags:
             </TabsContent>
 
             <TabsContent value="editor" className="m-0 h-full">
-              <div className="flex flex-col h-full">
-                {/* Hide Editor Control - Above the editor */}
-                <div className="flex items-center justify-end px-4 py-2 border-b border-border bg-card/50">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setEditorCollapsed(!editorCollapsed)}
-                    className="flex items-center gap-2"
-                    title={editorCollapsed ? "Show Editor" : "Hide Editor"}
-                  >
-                    {editorCollapsed ? (
-                      <>
-                        <PanelRightOpen className="h-4 w-4" />
-                        Show Editor
-                      </>
-                    ) : (
-                      <>
-                        <PanelRightClose className="h-4 w-4" />
-                        Hide Editor
-                      </>
-                    )}
-                  </Button>
+              <div className="flex flex-1 overflow-hidden">
+                <div className={`${editorCollapsed ? 'w-0 overflow-hidden' : 'w-1/2'} border-r border-border transition-all duration-300 ease-in-out`}>
+                  <YamlEditor 
+                    value={spec} 
+                    onChange={handleSpecChange}
+                    onToggleEditor={() => setEditorCollapsed(!editorCollapsed)}
+                    editorCollapsed={editorCollapsed}
+                  />
                 </div>
-                
-                {/* Editor Content */}
-                <div className="flex flex-1 overflow-hidden">
-                  <div className={`${editorCollapsed ? 'w-0 overflow-hidden' : 'w-1/2'} border-r border-border transition-all duration-300 ease-in-out`}>
-                    <YamlEditor 
-                      value={spec} 
-                      onChange={handleSpecChange}
-                    />
-                  </div>
-                  <div className={`${editorCollapsed ? 'w-full' : 'w-1/2'} transition-all duration-300 ease-in-out overflow-hidden`}>
-                    <RedocViewer 
-                      spec={parsedSpec} 
-                      theme={theme}
-                    />
-                  </div>
+                <div className={`${editorCollapsed ? 'w-full' : 'w-1/2'} transition-all duration-300 ease-in-out overflow-hidden`}>
+                  <RedocViewer 
+                    spec={parsedSpec} 
+                    theme={theme}
+                  />
                 </div>
               </div>
             </TabsContent>
