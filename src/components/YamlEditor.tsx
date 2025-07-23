@@ -236,7 +236,7 @@ export const YamlEditor: React.FC<YamlEditorProps> = ({ value, onChange }) => {
       )}
 
       {/* Editor */}
-      <CardContent className="flex-1 p-0">
+      <div className="flex-1 overflow-hidden">
         <Editor
           height="100%"
           defaultLanguage="yaml"
@@ -260,10 +260,18 @@ export const YamlEditor: React.FC<YamlEditorProps> = ({ value, onChange }) => {
             occurrencesHighlight: false,
             bracketPairColorization: {
               enabled: true
+            },
+            overviewRulerLanes: 0,
+            scrollbar: {
+              vertical: 'visible',
+              horizontal: 'visible',
+              useShadows: false,
+              verticalHasArrows: false,
+              horizontalHasArrows: false
             }
           }}
         />
-      </CardContent>
+      </div>
     </div>
   );
 };

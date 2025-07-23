@@ -56,53 +56,84 @@ export const TryItConsole: React.FC<TryItConsoleProps> = ({ spec, theme = 'dark'
 
   const currentOperation = selectedPath && selectedMethod && paths[selectedPath]?.[selectedMethod];
 
-  // Auto-load request body when API is selected (not just when method changes)
+  // Auto-load request body when API endpoint is selected
   useEffect(() => {
-    if (currentOperation && ['post', 'put', 'patch'].includes(selectedMethod.toLowerCase())) {
-      const requestBodySchema = currentOperation.requestBody?.content?.['application/json']?.schema;
-      
-      // First check for direct example
-      if (requestBodySchema?.example) {
-        setRequestBody(JSON.stringify(requestBodySchema.example, null, 2));
-        return;
-      }
-      
-      // Handle $ref schemas
-      let actualSchema = requestBodySchema;
-      if (requestBodySchema?.$ref && spec?.components?.schemas) {
-        const schemaName = requestBodySchema.$ref.split('/').pop();
-        actualSchema = spec.components.schemas[schemaName];
-      }
-      
-      // Generate sample body from schema properties
-      if (actualSchema?.properties) {
-        const sampleBody: any = {};
-        Object.entries(actualSchema.properties).forEach(([key, prop]: [string, any]) => {
-          if (prop.example !== undefined) {
-            sampleBody[key] = prop.example;
-          } else if (prop.type === 'string') {
-            if (prop.format === 'email') sampleBody[key] = 'user@example.com';
-            else if (prop.format === 'uuid') sampleBody[key] = '123e4567-e89b-12d3-a456-426614174000';
-            else if (prop.format === 'date-time') sampleBody[key] = new Date().toISOString();
-            else if (prop.format === 'uri') sampleBody[key] = 'https://example.com/image.jpg';
-            else if (prop.enum) sampleBody[key] = prop.enum[0];
-            else sampleBody[key] = prop.minLength ? 'sample text' : 'string';
-          } else if (prop.type === 'number' || prop.type === 'integer') {
-            sampleBody[key] = prop.minimum || prop.example || (prop.type === 'integer' ? 1 : 1.0);
-          } else if (prop.type === 'boolean') {
-            sampleBody[key] = true;
-          } else if (prop.type === 'array') {
-            sampleBody[key] = [];
-          } else if (prop.type === 'object') {
-            sampleBody[key] = {};
-          } else {
-            sampleBody[key] = null;
-          }
-        });
-        setRequestBody(JSON.stringify(sampleBody, null, 2));
-      }
-    } else if (!['post', 'put', 'patch'].includes(selectedMethod.toLowerCase())) {
+    console.log('TryItConsole: Effect triggered', { selectedPath, selectedMethod, hasCurrentOperation: !!currentOperation });
+    
+    if (!selectedPath || !selectedMethod) {
+      console.log('TryItConsole: No path or method selected, clearing body');
       setRequestBody('');
+      return;
+    }
+
+    if (!['post', 'put', 'patch'].includes(selectedMethod.toLowerCase())) {
+      console.log('TryItConsole: Method does not require body', selectedMethod);
+      setRequestBody('');
+      return;
+    }
+
+    if (!currentOperation) {
+      console.log('TryItConsole: No current operation found');
+      return;
+    }
+
+    console.log('TryItConsole: Generating request body for', selectedMethod, selectedPath);
+    
+    const requestBodySchema = currentOperation.requestBody?.content?.['application/json']?.schema;
+    
+    if (!requestBodySchema) {
+      console.log('TryItConsole: No request body schema found');
+      setRequestBody('{}');
+      return;
+    }
+    
+    // First check for direct example
+    if (requestBodySchema.example) {
+      console.log('TryItConsole: Using direct example from schema');
+      setRequestBody(JSON.stringify(requestBodySchema.example, null, 2));
+      return;
+    }
+    
+    // Handle $ref schemas
+    let actualSchema = requestBodySchema;
+    if (requestBodySchema.$ref && spec?.components?.schemas) {
+      const schemaName = requestBodySchema.$ref.split('/').pop();
+      console.log('TryItConsole: Resolving $ref schema:', schemaName);
+      actualSchema = spec.components.schemas[schemaName];
+    }
+    
+    // Generate sample body from schema properties
+    if (actualSchema?.properties) {
+      console.log('TryItConsole: Generating sample from properties');
+      const sampleBody: any = {};
+      Object.entries(actualSchema.properties).forEach(([key, prop]: [string, any]) => {
+        if (prop.example !== undefined) {
+          sampleBody[key] = prop.example;
+        } else if (prop.type === 'string') {
+          if (prop.format === 'email') sampleBody[key] = 'user@example.com';
+          else if (prop.format === 'uuid') sampleBody[key] = '123e4567-e89b-12d3-a456-426614174000';
+          else if (prop.format === 'date-time') sampleBody[key] = new Date().toISOString();
+          else if (prop.format === 'uri') sampleBody[key] = 'https://example.com/image.jpg';
+          else if (prop.enum) sampleBody[key] = prop.enum[0];
+          else sampleBody[key] = prop.minLength ? 'sample text' : 'string';
+        } else if (prop.type === 'number' || prop.type === 'integer') {
+          sampleBody[key] = prop.minimum || prop.example || (prop.type === 'integer' ? 1 : 1.0);
+        } else if (prop.type === 'boolean') {
+          sampleBody[key] = true;
+        } else if (prop.type === 'array') {
+          sampleBody[key] = [];
+        } else if (prop.type === 'object') {
+          sampleBody[key] = {};
+        } else {
+          sampleBody[key] = null;
+        }
+      });
+      const generatedBody = JSON.stringify(sampleBody, null, 2);
+      console.log('TryItConsole: Generated request body:', generatedBody);
+      setRequestBody(generatedBody);
+    } else {
+      console.log('TryItConsole: No properties found, using empty object');
+      setRequestBody('{}');
     }
   }, [selectedPath, selectedMethod, currentOperation, spec]);
 

@@ -878,25 +878,33 @@ tags:
             </TabsContent>
 
             <TabsContent value="editor" className="m-0 h-full">
-              <div className="flex h-full">
-                {!editorCollapsed && (
-                  <div className="w-1/2 border-r border-border">
-                    <YamlEditor 
-                      value={spec} 
-                      onChange={handleSpecChange}
-                    />
-                  </div>
-                )}
-                <div className={`relative ${editorCollapsed ? 'flex-1' : 'w-1/2'} transition-all duration-300`}>
+              <div className="flex h-full relative">
+                <div className={`${editorCollapsed ? 'w-0 overflow-hidden' : 'w-1/2'} border-r border-border transition-all duration-300 ease-in-out`}>
+                  <YamlEditor 
+                    value={spec} 
+                    onChange={handleSpecChange}
+                  />
+                </div>
+                <div className={`${editorCollapsed ? 'w-full' : 'w-1/2'} relative transition-all duration-300 ease-in-out`}>
                   {/* Editor Toggle Button */}
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => setEditorCollapsed(!editorCollapsed)}
-                    className="absolute top-4 right-4 z-10 bg-background/80 backdrop-blur-sm"
+                    className="absolute top-4 right-4 z-10 bg-background/90 backdrop-blur-sm border shadow-lg hover:bg-background"
                     title={editorCollapsed ? "Show Editor" : "Hide Editor"}
                   >
-                    {editorCollapsed ? <PanelRightOpen className="h-4 w-4" /> : <PanelRightClose className="h-4 w-4" />}
+                    {editorCollapsed ? (
+                      <>
+                        <PanelRightOpen className="h-4 w-4 mr-1" />
+                        Show Editor
+                      </>
+                    ) : (
+                      <>
+                        <PanelRightClose className="h-4 w-4 mr-1" />
+                        Hide Editor
+                      </>
+                    )}
                   </Button>
                   <RedocViewer 
                     spec={parsedSpec} 
