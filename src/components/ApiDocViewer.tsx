@@ -5,12 +5,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Drawer, DrawerContent, DrawerTrigger, DrawerClose } from '@/components/ui/drawer';
+import { 
+  Drawer,
+  DrawerContent,
+  DrawerTrigger,
+  DrawerClose,
+  DrawerHeader,
+  DrawerTitle
+} from '@/components/ui/drawer';
 import { FileUpload } from './FileUpload';
 import { YamlEditor } from './YamlEditor';
 import { TryItConsole } from './TryItConsole';
 import { RedocViewer } from './RedocViewer';
-import { Upload, FileText, Play, Settings, Sun, Moon, Menu } from 'lucide-react';
+import { Upload, FileText, Play, Settings, Sun, Moon, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface ApiDocViewerProps {}
 
@@ -19,12 +26,7 @@ export const ApiDocViewer: React.FC<ApiDocViewerProps> = () => {
   const [parsedSpec, setParsedSpec] = useState<any>(null);
   const [activeTab, setActiveTab] = useState('upload');
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
-  const [menuVisibility, setMenuVisibility] = useState({
-    loadSpec: true,
-    documentation: true,
-    editor: true,
-    tryIt: true,
-  });
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   // Load default sample spec on component mount
   React.useEffect(() => {
@@ -781,174 +783,150 @@ tags:
                 <p className="text-sm text-muted-foreground">Professional API Documentation Platform</p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Drawer>
-                <DrawerTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <Menu className="h-4 w-4" />
-                  </Button>
-                </DrawerTrigger>
-                <DrawerContent>
-                  <div className="p-6 space-y-4">
-                    <h3 className="text-lg font-semibold">Navigation Menu</h3>
-                    <div className="grid gap-2">
-                      {menuVisibility.loadSpec && (
-                        <DrawerClose asChild>
-                          <Button
-                            variant="ghost"
-                            onClick={() => setActiveTab('upload')}
-                            className="justify-start gap-2"
-                          >
-                            <Upload className="h-4 w-4" />
-                            Load Spec
-                          </Button>
-                        </DrawerClose>
-                      )}
-                      {menuVisibility.documentation && (
-                        <DrawerClose asChild>
-                          <Button
-                            variant="ghost"
-                            onClick={() => setActiveTab('viewer')}
-                            disabled={!parsedSpec}
-                            className="justify-start gap-2"
-                          >
-                            <FileText className="h-4 w-4" />
-                            Documentation
-                          </Button>
-                        </DrawerClose>
-                      )}
-                      {menuVisibility.editor && (
-                        <DrawerClose asChild>
-                          <Button
-                            variant="ghost"
-                            onClick={() => setActiveTab('editor')}
-                            disabled={!spec}
-                            className="justify-start gap-2"
-                          >
-                            <FileText className="h-4 w-4" />
-                            Editor
-                          </Button>
-                        </DrawerClose>
-                      )}
-                      {menuVisibility.tryIt && (
-                        <DrawerClose asChild>
-                          <Button
-                            variant="ghost"
-                            onClick={() => setActiveTab('tryit')}
-                            disabled={!parsedSpec}
-                            className="justify-start gap-2"
-                          >
-                            <Play className="h-4 w-4" />
-                            Try It
-                          </Button>
-                        </DrawerClose>
-                      )}
-                    </div>
-                    
-                    <div className="pt-4 border-t">
-                      <h4 className="text-sm font-semibold mb-2">Menu Visibility</h4>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="flex items-center space-x-2">
-                          <Switch
-                            id="show-load-spec"
-                            checked={menuVisibility.loadSpec}
-                            onCheckedChange={(checked) =>
-                              setMenuVisibility(prev => ({ ...prev, loadSpec: checked }))
-                            }
-                          />
-                          <Label htmlFor="show-load-spec" className="text-xs">Load Spec</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Switch
-                            id="show-documentation"
-                            checked={menuVisibility.documentation}
-                            onCheckedChange={(checked) =>
-                              setMenuVisibility(prev => ({ ...prev, documentation: checked }))
-                            }
-                          />
-                          <Label htmlFor="show-documentation" className="text-xs">Documentation</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Switch
-                            id="show-editor"
-                            checked={menuVisibility.editor}
-                            onCheckedChange={(checked) =>
-                              setMenuVisibility(prev => ({ ...prev, editor: checked }))
-                            }
-                          />
-                          <Label htmlFor="show-editor" className="text-xs">Editor</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Switch
-                            id="show-try-it"
-                            checked={menuVisibility.tryIt}
-                            onCheckedChange={(checked) =>
-                              setMenuVisibility(prev => ({ ...prev, tryIt: checked }))
-                            }
-                          />
-                          <Label htmlFor="show-try-it" className="text-xs">Try It</Label>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center space-x-2 mt-3">
-                        <Switch 
-                          id="theme-toggle" 
-                          checked={theme === 'light'} 
-                          onCheckedChange={(checked) => setTheme(checked ? 'light' : 'dark')}
-                        />
-                        <Label htmlFor="theme-toggle" className="flex items-center gap-2 text-xs font-medium">
-                          {theme === 'light' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-                          {theme === 'light' ? 'Light' : 'Dark'} Theme
-                        </Label>
-                      </div>
-                    </div>
-                  </div>
-                </DrawerContent>
-              </Drawer>
-            </div>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <div className="h-[calc(100vh-80px)] bg-background">
-        <Tabs value={activeTab} className="h-full">
-          <TabsContent value="upload" className="m-0 h-full">
-            <Card className="h-full">
-              <FileUpload onSpecLoad={handleSpecLoad} />
-            </Card>
-          </TabsContent>
+      <div className="flex h-[calc(100vh-80px)]">
+        {/* Sidebar */}
+        <div className={`${sidebarCollapsed ? 'w-16' : 'w-64'} border-r border-border bg-card/30 transition-all duration-300 ease-in-out animate-slide-in-right flex flex-col`}>
+          {/* Sidebar Header with Toggle */}
+          <div className="p-4 border-b border-border flex items-center justify-between">
+            {!sidebarCollapsed && (
+              <h2 className="font-semibold text-sm">Navigation</h2>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              className="hover-scale"
+            >
+              {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+            </Button>
+          </div>
 
-          <TabsContent value="viewer" className="m-0 h-full">
-            <div className="h-full mx-4 my-4">
-              <RedocViewer 
-                spec={parsedSpec} 
-                theme={theme}
-              />
-            </div>
-          </TabsContent>
+          {/* Navigation Menu */}
+          <div className="flex-1 p-4">
+            <Tabs value={activeTab} onValueChange={setActiveTab} orientation="vertical" className="w-full">
+              <TabsList className="grid w-full grid-cols-1 gap-2 h-auto bg-transparent p-0">
+                <TabsTrigger 
+                  value="upload" 
+                  className={`w-full ${sidebarCollapsed ? 'justify-center px-2' : 'justify-start gap-2'} data-[state=active]:bg-primary data-[state=active]:text-primary-foreground hover-scale`}
+                  title={sidebarCollapsed ? "Load Spec" : ""}
+                >
+                  <Upload className="h-4 w-4" />
+                  {!sidebarCollapsed && "Load Spec"}
+                </TabsTrigger>
+                
+                <TabsTrigger 
+                  value="viewer" 
+                  className={`w-full ${sidebarCollapsed ? 'justify-center px-2' : 'justify-start gap-2'} data-[state=active]:bg-primary data-[state=active]:text-primary-foreground hover-scale`}
+                  disabled={!parsedSpec}
+                  title={sidebarCollapsed ? "Documentation" : ""}
+                >
+                  <FileText className="h-4 w-4" />
+                  {!sidebarCollapsed && "Documentation"}
+                </TabsTrigger>
+                
+                <TabsTrigger 
+                  value="editor" 
+                  className={`w-full ${sidebarCollapsed ? 'justify-center px-2' : 'justify-start gap-2'} data-[state=active]:bg-primary data-[state=active]:text-primary-foreground hover-scale`}
+                  disabled={!spec}
+                  title={sidebarCollapsed ? "Editor" : ""}
+                >
+                  <FileText className="h-4 w-4" />
+                  {!sidebarCollapsed && "Editor"}
+                </TabsTrigger>
+                
+                <TabsTrigger 
+                  value="tryit" 
+                  className={`w-full ${sidebarCollapsed ? 'justify-center px-2' : 'justify-start gap-2'} data-[state=active]:bg-primary data-[state=active]:text-primary-foreground hover-scale`}
+                  disabled={!parsedSpec}
+                  title={sidebarCollapsed ? "Try It" : ""}
+                >
+                  <Play className="h-4 w-4" />
+                  {!sidebarCollapsed && "Try It"}
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
 
-          <TabsContent value="editor" className="m-0 h-full">
-            <div className="grid grid-cols-2 h-full">
-              <div className="border-r border-border">
-                <YamlEditor 
-                  value={spec} 
-                  onChange={handleSpecChange}
-                />
-              </div>
-              <div className="relative">
+          {/* Settings Section */}
+          <div className="p-4 border-t border-border">
+            <Drawer>
+              <DrawerTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  className={`w-full ${sidebarCollapsed ? 'justify-center px-2' : 'justify-start gap-2'} hover-scale`}
+                  title={sidebarCollapsed ? "Settings" : ""}
+                >
+                  <Settings className="h-4 w-4" />
+                  {!sidebarCollapsed && "Settings"}
+                </Button>
+              </DrawerTrigger>
+              <DrawerContent>
+                <DrawerHeader>
+                  <DrawerTitle>Settings</DrawerTitle>
+                </DrawerHeader>
+                <div className="p-6 space-y-4">
+                  <div className="flex items-center space-x-2">
+                    <Switch 
+                      id="theme-toggle" 
+                      checked={theme === 'light'} 
+                      onCheckedChange={(checked) => setTheme(checked ? 'light' : 'dark')}
+                    />
+                    <Label htmlFor="theme-toggle" className="flex items-center gap-2 text-sm font-medium">
+                      {theme === 'light' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                      {theme === 'light' ? 'Light' : 'Dark'} Theme
+                    </Label>
+                  </div>
+                </div>
+              </DrawerContent>
+            </Drawer>
+          </div>
+        </div>
+
+        {/* Main Content Area */}
+        <div className="flex-1 bg-background animate-fade-in">
+          <Tabs value={activeTab} className="h-full">
+            <TabsContent value="upload" className="m-0 h-full">
+              <Card className="h-full">
+                <FileUpload onSpecLoad={handleSpecLoad} />
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="viewer" className="m-0 h-full">
+              <div className="h-full mx-4 my-4">
                 <RedocViewer 
                   spec={parsedSpec} 
                   theme={theme}
                 />
               </div>
-            </div>
-          </TabsContent>
+            </TabsContent>
 
-          <TabsContent value="tryit" className="m-0 h-full">
-            <TryItConsole spec={parsedSpec} theme={theme} />
-          </TabsContent>
-        </Tabs>
+            <TabsContent value="editor" className="m-0 h-full">
+              <div className="grid grid-cols-2 h-full">
+                <div className="border-r border-border">
+                  <YamlEditor 
+                    value={spec} 
+                    onChange={handleSpecChange}
+                  />
+                </div>
+                <div className="relative">
+                  <RedocViewer 
+                    spec={parsedSpec} 
+                    theme={theme}
+                  />
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="tryit" className="m-0 h-full">
+              <TryItConsole spec={parsedSpec} theme={theme} />
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
     </div>
   );
