@@ -2,57 +2,80 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
+/* OpenAPI Documentation Tool Design System
+All colors MUST be HSL for proper theming support.
 */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Base colors - Professional dark theme */
+    --background: 220 13% 7%;
+    --foreground: 220 9% 92%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 220 13% 8%;
+    --card-foreground: 220 9% 92%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 220 13% 8%;
+    --popover-foreground: 220 9% 92%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary - Modern blue for technical tools */
+    --primary: 217 91% 60%;
+    --primary-foreground: 220 13% 7%;
+    --primary-glow: 217 91% 70%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary - Sophisticated gray */
+    --secondary: 220 13% 12%;
+    --secondary-foreground: 220 9% 85%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Muted - Subtle backgrounds */
+    --muted: 220 13% 10%;
+    --muted-foreground: 220 9% 65%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Accent - Green for success states */
+    --accent: 142 76% 45%;
+    --accent-foreground: 220 13% 7%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Destructive - Red for errors */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 220 9% 92%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Borders and inputs */
+    --border: 220 13% 15%;
+    --input: 220 13% 12%;
+    --ring: 217 91% 60%;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* API Documentation specific colors */
+    --editor-background: 220 13% 6%;
+    --editor-foreground: 220 9% 92%;
+    --panel-border: 220 13% 18%;
+    
+    /* HTTP method colors */
+    --method-get: 142 76% 45%;
+    --method-post: 47 100% 62%;
+    --method-put: 35 91% 62%;
+    --method-delete: 0 84% 60%;
+    --method-patch: 271 76% 53%;
+    
+    /* Status code colors */
+    --status-success: 142 76% 45%;
+    --status-error: 0 84% 60%;
+    --status-warning: 47 100% 62%;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%), hsl(217 91% 70%));
+    --gradient-hero: linear-gradient(135deg, hsl(220 13% 7%), hsl(220 13% 10%));
+    
+    /* Sidebar - Developer tool theme */
+    --sidebar-background: 220 13% 8%;
+    --sidebar-foreground: 220 9% 85%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 220 13% 7%;
+    --sidebar-accent: 220 13% 12%;
+    --sidebar-accent-foreground: 220 9% 85%;
+    --sidebar-border: 220 13% 15%;
+    --sidebar-ring: 217 91% 60%;
   }
 
   .dark {

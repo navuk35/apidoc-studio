@@ -26,7 +26,8 @@ export default {
 				foreground: 'hsl(var(--foreground))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+					foreground: 'hsl(var(--primary-foreground))',
+					glow: 'hsl(var(--primary-glow))'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
@@ -51,6 +52,22 @@ export default {
 				card: {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
+				},
+				editor: {
+					DEFAULT: 'hsl(var(--editor-background))',
+					foreground: 'hsl(var(--editor-foreground))'
+				},
+				method: {
+					get: 'hsl(var(--method-get))',
+					post: 'hsl(var(--method-post))',
+					put: 'hsl(var(--method-put))',
+					delete: 'hsl(var(--method-delete))',
+					patch: 'hsl(var(--method-patch))'
+				},
+				status: {
+					success: 'hsl(var(--status-success))',
+					error: 'hsl(var(--status-error))',
+					warning: 'hsl(var(--status-warning))'
 				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
