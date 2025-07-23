@@ -1017,30 +1017,37 @@ tags:
 
             <TabsContent value="editor" className="m-0 h-full">
               <div className="flex flex-1 overflow-hidden relative">
-                <div className={`${editorCollapsed ? 'w-0 overflow-hidden' : 'w-1/2'} border-r border-border transition-all duration-300 ease-in-out relative z-20`}>
-                  <YamlEditor 
-                    value={spec} 
-                    onChange={handleSpecChange}
-                    onToggleVisibility={() => setEditorCollapsed(!editorCollapsed)}
-                    showToggleButton={!editorCollapsed}
-                  />
+                {/* Editor Panel with sliding door effect */}
+                <div className={`${editorCollapsed ? 'w-0' : 'w-1/2'} border-r border-border transition-all duration-300 ease-in-out relative overflow-hidden`}>
+                  <div className={`h-full transition-transform duration-300 ease-in-out ${
+                    editorCollapsed ? 'translate-x-full' : 'translate-x-0'
+                  }`}>
+                    <YamlEditor 
+                      value={spec} 
+                      onChange={handleSpecChange}
+                    />
+                  </div>
+                  
+                  {/* Sliding Door Arrow Button - positioned at right edge */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setEditorCollapsed(!editorCollapsed)}
+                    className={`absolute top-4 z-20 bg-background/90 backdrop-blur-sm border-border/50 shadow-md hover:bg-background transition-all duration-300 ${
+                      editorCollapsed ? '-right-10' : 'right-2'
+                    }`}
+                    title={editorCollapsed ? "Show Editor" : "Hide Editor"}
+                  >
+                    {editorCollapsed ? (
+                      <ChevronLeft className="h-4 w-4" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4" />
+                    )}
+                  </Button>
                 </div>
+                
+                {/* Documentation Panel */}
                 <div className={`${editorCollapsed ? 'w-full' : 'w-1/2'} transition-all duration-300 ease-in-out overflow-hidden relative z-10`}>
-                  {/* Show Editor Button - Only visible when editor is collapsed */}
-                  {editorCollapsed && (
-                    <div className="absolute top-4 left-4 z-30">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setEditorCollapsed(false)}
-                        className="flex items-center gap-2 bg-background/90 backdrop-blur-sm border-border/50 shadow-md hover:bg-background"
-                        title="Show Editor"
-                      >
-                        <PanelLeftOpen className="h-4 w-4" />
-                        Show Editor
-                      </Button>
-                    </div>
-                  )}
                   <RedocViewer 
                     spec={parsedSpec} 
                     theme={theme}

@@ -21,7 +21,7 @@ interface ValidationError {
   severity: 'error' | 'warning';
 }
 
-export const YamlEditor: React.FC<YamlEditorProps> = ({ value, onChange, onToggleVisibility, showToggleButton = false }) => {
+export const YamlEditor: React.FC<YamlEditorProps> = ({ value, onChange }) => {
   const [editorValue, setEditorValue] = useState(value);
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
   const [isValid, setIsValid] = useState(true);
@@ -180,18 +180,6 @@ export const YamlEditor: React.FC<YamlEditorProps> = ({ value, onChange, onToggl
 
   return (
     <div className="h-full flex flex-col relative z-10">
-      {/* Toggle Button - Left Top */}
-      {showToggleButton && onToggleVisibility && (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onToggleVisibility}
-          className="absolute top-2 left-2 z-20 bg-background/90 backdrop-blur-sm border-border/50 shadow-md hover:bg-background"
-          title="Hide Editor"
-        >
-          <PanelLeftClose className="h-4 w-4" />
-        </Button>
-      )}
       
       {/* Editor Header */}
       <CardHeader className="h-16 flex-shrink-0 border-b border-border">

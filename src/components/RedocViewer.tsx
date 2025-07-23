@@ -24,7 +24,9 @@ export const RedocViewer: React.FC<RedocViewerProps> = ({ spec, theme = 'dark' }
       return;
     }
 
-    setIsLoading(true);
+    // Don't show loading if we're just updating the spec
+    const isInitialLoad = !window.Redoc;
+    setIsLoading(isInitialLoad);
     setError(null);
     console.log('RedocViewer: Starting to load Redoc for spec:', spec?.info?.title || 'Unknown API');
 
@@ -158,9 +160,22 @@ export const RedocViewer: React.FC<RedocViewerProps> = ({ spec, theme = 'dark' }
           throw new Error('Redoc.init is not available');
         }
 
-        // Initialize Redoc
+        // Initialize Redoc with sticky navigation
         window.Redoc.init(spec, options, redocDiv);
         console.log('RedocViewer: Redoc initialized successfully');
+        
+        // Preserve navigation scroll position after rendering
+        setTimeout(() => {
+          const menuContent = redocDiv.querySelector('.menu-content') as HTMLElement;
+          if (menuContent) {
+            menuContent.style.position = 'sticky';
+            menuContent.style.top = '0';
+            menuContent.style.height = '100vh';
+            menuContent.style.overflowY = 'auto';
+            menuContent.style.zIndex = '10';
+          }
+        }, 500);
+        
         setIsLoading(false);
         
       } catch (error) {
@@ -272,13 +287,22 @@ export const RedocViewer: React.FC<RedocViewerProps> = ({ spec, theme = 'dark' }
             overflow: auto !important;
           }
           
-          /* Fix z-index issues */
+          /* Fix z-index and sticky navigation */
           .redoc-wrap .menu-content {
-            z-index: 5 !important;
+            position: sticky !important;
+            top: 0 !important;
+            height: 100vh !important;
+            overflow-y: auto !important;
+            z-index: 10 !important;
           }
           
           .redoc-wrap .dropdown {
             z-index: 15 !important;
+          }
+          
+          /* Keep menu visible during spec changes */
+          .redoc-wrap .menu-content .scrollbar-container {
+            height: 100% !important;
           }
         `
       }} />
