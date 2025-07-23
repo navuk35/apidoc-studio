@@ -1021,11 +1021,31 @@ tags:
                   <YamlEditor 
                     value={spec} 
                     onChange={handleSpecChange}
-                    onToggleEditor={() => setEditorCollapsed(!editorCollapsed)}
-                    editorCollapsed={editorCollapsed}
                   />
                 </div>
-                <div className={`${editorCollapsed ? 'w-full' : 'w-1/2'} transition-all duration-300 ease-in-out overflow-hidden`}>
+                <div className={`${editorCollapsed ? 'w-full' : 'w-1/2'} transition-all duration-300 ease-in-out overflow-hidden relative`}>
+                  {/* Toggle Editor Button - Always visible */}
+                  <div className="absolute top-4 right-4 z-10">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setEditorCollapsed(!editorCollapsed)}
+                      className="flex items-center gap-2 bg-background/80 backdrop-blur-sm border-border/50"
+                      title={editorCollapsed ? "Show Editor" : "Hide Editor"}
+                    >
+                      {editorCollapsed ? (
+                        <>
+                          <PanelRightOpen className="h-4 w-4" />
+                          Show Editor
+                        </>
+                      ) : (
+                        <>
+                          <PanelRightClose className="h-4 w-4" />
+                          Hide Editor
+                        </>
+                      )}
+                    </Button>
+                  </div>
                   <RedocViewer 
                     spec={parsedSpec} 
                     theme={theme}
