@@ -2,11 +2,14 @@ import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import { FileUpload } from './FileUpload';
 import { YamlEditor } from './YamlEditor';
 import { TryItConsole } from './TryItConsole';
 import { RedocViewer } from './RedocViewer';
-import { Upload, FileText, Play, Settings } from 'lucide-react';
+import { Upload, FileText, Play, Settings, Eye, EyeOff, Sun, Moon, Server } from 'lucide-react';
 
 interface ApiDocViewerProps {}
 
@@ -14,6 +17,9 @@ export const ApiDocViewer: React.FC<ApiDocViewerProps> = () => {
   const [spec, setSpec] = useState<string>('');
   const [parsedSpec, setParsedSpec] = useState<any>(null);
   const [activeTab, setActiveTab] = useState('upload');
+  const [hideNavigation, setHideNavigation] = useState(false);
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+  const [mockServerEnabled, setMockServerEnabled] = useState(false);
 
   // Load default sample spec on component mount
   React.useEffect(() => {
@@ -868,8 +874,59 @@ tags:
               </div>
             </TabsContent>
 
-            <TabsContent value="viewer" className="m-0 h-full">
-              <RedocViewer spec={parsedSpec} />
+            <TabsContent value="viewer" className="m-0 h-full space-y-4">
+              <div className="flex items-center justify-between gap-4 p-4 bg-card rounded-lg border mx-4 mt-4">
+                <div className="flex items-center gap-6">
+                  <div className="flex items-center gap-2">
+                    <Switch 
+                      id="hide-nav" 
+                      checked={hideNavigation} 
+                      onCheckedChange={setHideNavigation}
+                    />
+                    <Label htmlFor="hide-nav" className="flex items-center gap-2 text-sm font-medium">
+                      {hideNavigation ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {hideNavigation ? 'Show Navigation' : 'Hide Navigation'}
+                    </Label>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <Switch 
+                      id="theme-toggle" 
+                      checked={theme === 'light'} 
+                      onCheckedChange={(checked) => setTheme(checked ? 'light' : 'dark')}
+                    />
+                    <Label htmlFor="theme-toggle" className="flex items-center gap-2 text-sm font-medium">
+                      {theme === 'light' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                      {theme === 'light' ? 'Light' : 'Dark'} Theme
+                    </Label>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <Switch 
+                      id="mock-server" 
+                      checked={mockServerEnabled} 
+                      onCheckedChange={setMockServerEnabled}
+                    />
+                    <Label htmlFor="mock-server" className="flex items-center gap-2 text-sm font-medium">
+                      <Server className="h-4 w-4" />
+                      Mock Server
+                    </Label>
+                    {mockServerEnabled && (
+                      <Badge variant="secondary" className="text-xs">
+                        Active
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="h-[calc(100%-5rem)] mx-4 mb-4">
+                <RedocViewer 
+                  spec={parsedSpec} 
+                  hideNavigation={hideNavigation}
+                  theme={theme}
+                />
+              </div>
             </TabsContent>
 
             <TabsContent value="editor" className="m-0 h-full">
@@ -881,7 +938,11 @@ tags:
                   />
                 </div>
                 <div>
-                  <RedocViewer spec={parsedSpec} />
+                  <RedocViewer 
+                    spec={parsedSpec} 
+                    hideNavigation={hideNavigation}
+                    theme={theme}
+                  />
                 </div>
               </div>
             </TabsContent>

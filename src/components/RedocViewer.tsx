@@ -3,6 +3,8 @@ import { CardContent } from '@/components/ui/card';
 
 interface RedocViewerProps {
   spec: any;
+  hideNavigation?: boolean;
+  theme?: 'light' | 'dark';
 }
 
 declare global {
@@ -11,7 +13,7 @@ declare global {
   }
 }
 
-export const RedocViewer: React.FC<RedocViewerProps> = ({ spec }) => {
+export const RedocViewer: React.FC<RedocViewerProps> = ({ spec, hideNavigation = false, theme = 'dark' }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -19,6 +21,12 @@ export const RedocViewer: React.FC<RedocViewerProps> = ({ spec }) => {
   useEffect(() => {
     if (!spec || !containerRef.current) {
       console.log('RedocViewer: No spec or container ref', { spec: !!spec, container: !!containerRef.current });
+      return;
+    }
+
+    // Don't reload if already loading or if the container already has content
+    if (isLoading || (containerRef.current.children.length > 0)) {
+      console.log('RedocViewer: Already loading or content exists, skipping');
       return;
     }
 
@@ -92,7 +100,20 @@ export const RedocViewer: React.FC<RedocViewerProps> = ({ spec }) => {
 
         // Initialize Redoc with simplified options
         const options = {
-          theme: {
+          theme: theme === 'light' ? {
+            colors: {
+              primary: {
+                main: '#3B82F6'
+              }
+            },
+            sidebar: {
+              backgroundColor: '#F9FAFB',
+              textColor: '#374151'
+            },
+            rightPanel: {
+              backgroundColor: '#FFFFFF'
+            }
+          } : {
             colors: {
               primary: {
                 main: '#3B82F6'
@@ -110,7 +131,8 @@ export const RedocViewer: React.FC<RedocViewerProps> = ({ spec }) => {
           hideDownloadButton: false,
           disableSearch: false,
           expandResponses: '200,201',
-          nativeScrollbars: false
+          nativeScrollbars: false,
+          hideNavigation: hideNavigation
         };
 
         // Double-check Redoc is available
@@ -162,7 +184,7 @@ export const RedocViewer: React.FC<RedocViewerProps> = ({ spec }) => {
         containerRef.current.innerHTML = '';
       }
     };
-  }, [spec]);
+  }, [spec, hideNavigation, theme]);
 
   if (!spec) {
     return (
@@ -203,7 +225,7 @@ export const RedocViewer: React.FC<RedocViewerProps> = ({ spec }) => {
   }
 
   return (
-    <div className="h-full w-full bg-[#0F172A]">
+    <div className={`h-full w-full ${theme === 'light' ? 'bg-white' : 'bg-[#0F172A]'}`}>
       <div 
         ref={containerRef} 
         className="h-full w-full"
