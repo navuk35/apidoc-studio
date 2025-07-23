@@ -23,9 +23,9 @@ export const RedocViewer: React.FC<RedocViewerProps> = ({ spec, theme = 'dark' }
       return;
     }
 
-    // Don't reload if already loading or if the container already has content
-    if (isLoading || (containerRef.current.children.length > 0)) {
-      console.log('RedocViewer: Already loading or content exists, skipping');
+    // Don't reload if already loading
+    if (isLoading) {
+      console.log('RedocViewer: Already loading, skipping');
       return;
     }
 

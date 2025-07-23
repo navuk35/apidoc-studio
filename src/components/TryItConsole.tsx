@@ -43,6 +43,14 @@ export const TryItConsole: React.FC<TryItConsoleProps> = ({ spec, theme = 'dark'
 
   // Extract servers from spec
   const servers = spec?.servers || [{ url: 'https://api.example.com' }];
+
+  // Auto-set server URL when mock server is enabled
+  useEffect(() => {
+    if (mockServerEnabled && !selectedServer) {
+      const defaultServer = servers[0]?.url || 'https://api.example.com';
+      setSelectedServer(defaultServer);
+    }
+  }, [mockServerEnabled, selectedServer, servers]);
   
   // Extract paths and methods
   const paths = spec?.paths || {};
