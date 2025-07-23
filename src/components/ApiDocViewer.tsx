@@ -13,18 +13,31 @@ import { FileUpload } from './FileUpload';
 import { YamlEditor } from './YamlEditor';
 import { TryItConsole } from './TryItConsole';
 import { RedocViewer } from './RedocViewer';
-import { Upload, FileText, Play, Settings, ChevronLeft, ChevronRight, PanelRightClose, PanelRightOpen, Menu } from 'lucide-react';
+import { Upload, FileText, Play, Settings, ChevronLeft, ChevronRight, PanelRightClose, PanelRightOpen, Menu, Plus, X } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+interface ApiSpec {
+  id: string;
+  name: string;
+  content: string;
+  parsed: any;
+}
 
 interface ApiDocViewerProps {}
 
 export const ApiDocViewer: React.FC<ApiDocViewerProps> = () => {
-  const [spec, setSpec] = useState<string>('');
-  const [parsedSpec, setParsedSpec] = useState<any>(null);
+  const [specs, setSpecs] = useState<ApiSpec[]>([]);
+  const [selectedSpecId, setSelectedSpecId] = useState<string>('');
   const [activeTab, setActiveTab] = useState('upload');
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [editorCollapsed, setEditorCollapsed] = useState(false);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+
+  // Get currently selected spec
+  const currentSpec = specs.find(spec => spec.id === selectedSpecId);
+  const spec = currentSpec?.content || '';
+  const parsedSpec = currentSpec?.parsed || null;
 
   // Load default sample spec on component mount
   React.useEffect(() => {
@@ -750,20 +763,50 @@ tags:
     description: Order management operations`;
 
     console.log('ApiDocViewer: Loading default E-Commerce API spec');
-    setSpec(yamlContent);
-    setParsedSpec(defaultSpec);
+    const defaultSpecObj: ApiSpec = {
+      id: 'default-ecommerce',
+      name: 'E-Commerce API',
+      content: yamlContent,
+      parsed: defaultSpec
+    };
+    setSpecs([defaultSpecObj]);
+    setSelectedSpecId('default-ecommerce');
   }, []);
 
   const handleSpecLoad = useCallback((newSpec: string, parsed: any) => {
-    setSpec(newSpec);
-    setParsedSpec(parsed);
+    const title = parsed?.info?.title || 'Unnamed API';
+    const specId = `spec-${Date.now()}`;
+    const newSpecObj: ApiSpec = {
+      id: specId,
+      name: title,
+      content: newSpec,
+      parsed: parsed
+    };
+    setSpecs(prev => [...prev, newSpecObj]);
+    setSelectedSpecId(specId);
     setActiveTab('viewer');
   }, []);
 
   const handleSpecChange = useCallback((newSpec: string, parsed: any) => {
-    setSpec(newSpec);
-    setParsedSpec(parsed);
-  }, []);
+    if (!selectedSpecId) return;
+    setSpecs(prev => prev.map(spec => 
+      spec.id === selectedSpecId 
+        ? { ...spec, content: newSpec, parsed: parsed }
+        : spec
+    ));
+  }, [selectedSpecId]);
+
+  const handleRemoveSpec = useCallback((specId: string) => {
+    setSpecs(prev => {
+      const filtered = prev.filter(spec => spec.id !== specId);
+      if (selectedSpecId === specId && filtered.length > 0) {
+        setSelectedSpecId(filtered[0].id);
+      } else if (filtered.length === 0) {
+        setSelectedSpecId('');
+      }
+      return filtered;
+    });
+  }, [selectedSpecId]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -895,9 +938,76 @@ tags:
             </Tabs>
           </div>
 
-          {/* Settings Section */}
+          {/* API Specs Section */}
           <div className="p-4 border-t border-border">
-            {/* Removed theme toggler as requested */}
+            {!sidebarCollapsed && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-medium text-sm">API Specs</h3>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setActiveTab('upload')}
+                    className="h-6 w-6 p-0"
+                    title="Add new spec"
+                  >
+                    <Plus className="h-3 w-3" />
+                  </Button>
+                </div>
+                
+                {specs.length > 0 && (
+                  <Select value={selectedSpecId} onValueChange={setSelectedSpecId}>
+                    <SelectTrigger className="w-full text-xs">
+                      <SelectValue placeholder="Select API spec" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {specs.map((spec) => (
+                        <SelectItem key={spec.id} value={spec.id}>
+                          <div className="flex items-center justify-between w-full">
+                            <span className="truncate max-w-[150px]">{spec.name}</span>
+                            {specs.length > 1 && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRemoveSpec(spec.id);
+                                }}
+                                className="h-4 w-4 p-0 ml-2 hover:bg-destructive hover:text-destructive-foreground"
+                                title="Remove spec"
+                              >
+                                <X className="h-2 w-2" />
+                              </Button>
+                            )}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+                
+                {specs.length === 0 && (
+                  <p className="text-xs text-muted-foreground">No specs loaded</p>
+                )}
+              </div>
+            )}
+            
+            {sidebarCollapsed && specs.length > 0 && (
+              <div className="flex flex-col items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setActiveTab('upload')}
+                  className="h-8 w-8 p-0"
+                  title="Add new spec"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+                <span className="text-xs text-center font-mono bg-muted px-1 py-0.5 rounded">
+                  {specs.length}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
