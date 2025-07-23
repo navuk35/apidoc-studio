@@ -88,7 +88,7 @@ export const RedocViewer: React.FC<RedocViewerProps> = ({ spec, hideNavigation =
         const redocDiv = document.createElement('div');
         redocDiv.id = `redoc-container-${Date.now()}`;
         redocDiv.style.height = '100%';
-        redocDiv.style.width = '100%';
+        redocDiv.style.zIndex = '1';
         containerRef.current.appendChild(redocDiv);
 
         console.log('RedocViewer: Initializing Redoc with spec');
@@ -225,10 +225,14 @@ export const RedocViewer: React.FC<RedocViewerProps> = ({ spec, hideNavigation =
   }
 
   return (
-    <div className={`h-full w-full ${theme === 'light' ? 'bg-white' : 'bg-[#0F172A]'}`}>
+    <div className={`h-full w-full relative ${theme === 'light' ? 'bg-white' : 'bg-[#0F172A]'}`}>
       <div 
         ref={containerRef} 
-        className="h-full w-full"
+        className="h-full w-full relative z-0"
+        style={{
+          position: 'relative',
+          zIndex: 1
+        }}
       />
     </div>
   );

@@ -824,36 +824,6 @@ tags:
                 Try It
               </TabsTrigger>
             </TabsList>
-
-            {/* Tab Content */}
-            <div className="flex-1 mt-6">
-              <TabsContent value="upload" className="m-0 h-full">
-                <Card className="h-full">
-                  <FileUpload onSpecLoad={handleSpecLoad} />
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="viewer" className="m-0 h-full">
-                <Card className="h-full">
-                  <RedocViewer spec={parsedSpec} />
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="editor" className="m-0 h-full">
-                <Card className="h-full">
-                  <YamlEditor 
-                    value={spec} 
-                    onChange={handleSpecChange}
-                  />
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="tryit" className="m-0 h-full">
-                <Card className="h-full">
-                  <TryItConsole spec={parsedSpec} />
-                </Card>
-              </TabsContent>
-            </div>
           </Tabs>
         </div>
 
@@ -937,7 +907,7 @@ tags:
                     onChange={handleSpecChange}
                   />
                 </div>
-                <div>
+                <div className="relative">
                   <RedocViewer 
                     spec={parsedSpec} 
                     hideNavigation={hideNavigation}
