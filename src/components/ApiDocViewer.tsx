@@ -15,6 +15,735 @@ export const ApiDocViewer: React.FC<ApiDocViewerProps> = () => {
   const [parsedSpec, setParsedSpec] = useState<any>(null);
   const [activeTab, setActiveTab] = useState('upload');
 
+  // Load default sample spec on component mount
+  React.useEffect(() => {
+    const defaultSpec = {
+      openapi: "3.0.3",
+      info: {
+        title: "E-Commerce API",
+        description: "A comprehensive RESTful API for an e-commerce platform featuring product management, user authentication, order processing, and payment integration.",
+        version: "2.1.0",
+        contact: {
+          name: "API Support Team",
+          email: "api-support@ecommerce.com",
+          url: "https://ecommerce.com/support"
+        },
+        license: {
+          name: "MIT",
+          url: "https://opensource.org/licenses/MIT"
+        }
+      },
+      servers: [
+        {
+          url: "https://api.ecommerce.com/v2",
+          description: "Production server"
+        },
+        {
+          url: "https://staging-api.ecommerce.com/v2",
+          description: "Staging server"
+        },
+        {
+          url: "http://localhost:3000/api/v2",
+          description: "Development server"
+        }
+      ],
+      paths: {
+        "/products": {
+          get: {
+            summary: "Get all products",
+            description: "Retrieve a paginated list of products with optional filtering and sorting capabilities",
+            operationId: "getProducts",
+            tags: ["Products"],
+            parameters: [
+              {
+                name: "page",
+                in: "query",
+                description: "Page number for pagination",
+                schema: { type: "integer", minimum: 1, default: 1 }
+              },
+              {
+                name: "limit",
+                in: "query", 
+                description: "Number of products per page",
+                schema: { type: "integer", minimum: 1, maximum: 100, default: 20 }
+              },
+              {
+                name: "category",
+                in: "query",
+                description: "Filter by product category",
+                schema: { type: "string" }
+              },
+              {
+                name: "sort",
+                in: "query",
+                description: "Sort products by field",
+                schema: { type: "string", enum: ["name", "price", "created_at", "rating"] }
+              }
+            ],
+            responses: {
+              "200": {
+                description: "Successful response with product list",
+                content: {
+                  "application/json": {
+                    schema: {
+                      type: "object",
+                      properties: {
+                        products: {
+                          type: "array",
+                          items: { "$ref": "#/components/schemas/Product" }
+                        },
+                        pagination: { "$ref": "#/components/schemas/Pagination" }
+                      }
+                    }
+                  }
+                }
+              },
+              "400": {
+                description: "Bad request - invalid parameters",
+                content: {
+                  "application/json": {
+                    schema: { "$ref": "#/components/schemas/Error" }
+                  }
+                }
+              }
+            }
+          },
+          post: {
+            summary: "Create a new product",
+            description: "Add a new product to the catalog (requires admin privileges)",
+            operationId: "createProduct",
+            tags: ["Products"],
+            security: [{ "bearerAuth": [] }],
+            requestBody: {
+              required: true,
+              content: {
+                "application/json": {
+                  schema: { "$ref": "#/components/schemas/ProductCreateRequest" }
+                }
+              }
+            },
+            responses: {
+              "201": {
+                description: "Product created successfully",
+                content: {
+                  "application/json": {
+                    schema: { "$ref": "#/components/schemas/Product" }
+                  }
+                }
+              },
+              "400": {
+                description: "Invalid request data",
+                content: {
+                  "application/json": {
+                    schema: { "$ref": "#/components/schemas/Error" }
+                  }
+                }
+              },
+              "401": {
+                description: "Unauthorized - invalid token",
+                content: {
+                  "application/json": {
+                    schema: { "$ref": "#/components/schemas/Error" }
+                  }
+                }
+              },
+              "403": {
+                description: "Forbidden - insufficient privileges",
+                content: {
+                  "application/json": {
+                    schema: { "$ref": "#/components/schemas/Error" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/products/{productId}": {
+          get: {
+            summary: "Get product by ID",
+            description: "Retrieve detailed information about a specific product",
+            operationId: "getProductById",
+            tags: ["Products"],
+            parameters: [
+              {
+                name: "productId",
+                in: "path",
+                required: true,
+                description: "Unique identifier for the product",
+                schema: { type: "string", format: "uuid" }
+              }
+            ],
+            responses: {
+              "200": {
+                description: "Product details",
+                content: {
+                  "application/json": {
+                    schema: { "$ref": "#/components/schemas/Product" }
+                  }
+                }
+              },
+              "404": {
+                description: "Product not found",
+                content: {
+                  "application/json": {
+                    schema: { "$ref": "#/components/schemas/Error" }
+                  }
+                }
+              }
+            }
+          },
+          put: {
+            summary: "Update product",
+            description: "Update an existing product (requires admin privileges)",
+            operationId: "updateProduct",
+            tags: ["Products"],
+            security: [{ "bearerAuth": [] }],
+            parameters: [
+              {
+                name: "productId",
+                in: "path",
+                required: true,
+                description: "Unique identifier for the product",
+                schema: { type: "string", format: "uuid" }
+              }
+            ],
+            requestBody: {
+              required: true,
+              content: {
+                "application/json": {
+                  schema: { "$ref": "#/components/schemas/ProductUpdateRequest" }
+                }
+              }
+            },
+            responses: {
+              "200": {
+                description: "Product updated successfully",
+                content: {
+                  "application/json": {
+                    schema: { "$ref": "#/components/schemas/Product" }
+                  }
+                }
+              },
+              "404": {
+                description: "Product not found"
+              },
+              "401": {
+                description: "Unauthorized"
+              },
+              "403": {
+                description: "Forbidden"
+              }
+            }
+          },
+          delete: {
+            summary: "Delete product",
+            description: "Remove a product from the catalog (requires admin privileges)",
+            operationId: "deleteProduct",
+            tags: ["Products"],
+            security: [{ "bearerAuth": [] }],
+            parameters: [
+              {
+                name: "productId",
+                in: "path",
+                required: true,
+                description: "Unique identifier for the product",
+                schema: { type: "string", format: "uuid" }
+              }
+            ],
+            responses: {
+              "204": {
+                description: "Product deleted successfully"
+              },
+              "404": {
+                description: "Product not found"
+              },
+              "401": {
+                description: "Unauthorized"
+              },
+              "403": {
+                description: "Forbidden"
+              }
+            }
+          }
+        },
+        "/auth/login": {
+          post: {
+            summary: "User login",
+            description: "Authenticate user credentials and receive access token",
+            operationId: "login",
+            tags: ["Authentication"],
+            requestBody: {
+              required: true,
+              content: {
+                "application/json": {
+                  schema: { "$ref": "#/components/schemas/LoginRequest" }
+                }
+              }
+            },
+            responses: {
+              "200": {
+                description: "Login successful",
+                content: {
+                  "application/json": {
+                    schema: { "$ref": "#/components/schemas/AuthResponse" }
+                  }
+                }
+              },
+              "401": {
+                description: "Invalid credentials",
+                content: {
+                  "application/json": {
+                    schema: { "$ref": "#/components/schemas/Error" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/orders": {
+          get: {
+            summary: "Get user orders",
+            description: "Retrieve orders for the authenticated user",
+            operationId: "getUserOrders",
+            tags: ["Orders"],
+            security: [{ "bearerAuth": [] }],
+            parameters: [
+              {
+                name: "status",
+                in: "query",
+                description: "Filter orders by status",
+                schema: { 
+                  type: "string", 
+                  enum: ["pending", "processing", "shipped", "delivered", "cancelled"] 
+                }
+              }
+            ],
+            responses: {
+              "200": {
+                description: "List of user orders",
+                content: {
+                  "application/json": {
+                    schema: {
+                      type: "array",
+                      items: { "$ref": "#/components/schemas/Order" }
+                    }
+                  }
+                }
+              },
+              "401": {
+                description: "Unauthorized"
+              }
+            }
+          },
+          post: {
+            summary: "Create new order",
+            description: "Place a new order for the authenticated user",
+            operationId: "createOrder",
+            tags: ["Orders"],
+            security: [{ "bearerAuth": [] }],
+            requestBody: {
+              required: true,
+              content: {
+                "application/json": {
+                  schema: { "$ref": "#/components/schemas/OrderCreateRequest" }
+                }
+              }
+            },
+            responses: {
+              "201": {
+                description: "Order created successfully",
+                content: {
+                  "application/json": {
+                    schema: { "$ref": "#/components/schemas/Order" }
+                  }
+                }
+              },
+              "400": {
+                description: "Invalid order data"
+              },
+              "401": {
+                description: "Unauthorized"
+              }
+            }
+          }
+        }
+      },
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: "http",
+            scheme: "bearer",
+            bearerFormat: "JWT"
+          }
+        },
+        schemas: {
+          Product: {
+            type: "object",
+            required: ["id", "name", "price", "category"],
+            properties: {
+              id: { type: "string", format: "uuid", description: "Unique product identifier" },
+              name: { type: "string", description: "Product name", example: "Wireless Bluetooth Headphones" },
+              description: { type: "string", description: "Detailed product description" },
+              price: { type: "number", format: "float", minimum: 0, description: "Product price in USD", example: 99.99 },
+              category: { type: "string", description: "Product category", example: "Electronics" },
+              sku: { type: "string", description: "Stock keeping unit", example: "WBH-001" },
+              stock_quantity: { type: "integer", minimum: 0, description: "Available quantity", example: 150 },
+              images: { 
+                type: "array", 
+                items: { type: "string", format: "uri" },
+                description: "Product image URLs"
+              },
+              rating: { type: "number", format: "float", minimum: 0, maximum: 5, description: "Average rating" },
+              created_at: { type: "string", format: "date-time" },
+              updated_at: { type: "string", format: "date-time" }
+            }
+          },
+          ProductCreateRequest: {
+            type: "object",
+            required: ["name", "price", "category"],
+            properties: {
+              name: { type: "string", minLength: 1, maxLength: 200 },
+              description: { type: "string", maxLength: 1000 },
+              price: { type: "number", format: "float", minimum: 0 },
+              category: { type: "string", minLength: 1 },
+              sku: { type: "string" },
+              stock_quantity: { type: "integer", minimum: 0, default: 0 },
+              images: { type: "array", items: { type: "string", format: "uri" } }
+            }
+          },
+          ProductUpdateRequest: {
+            type: "object",
+            properties: {
+              name: { type: "string", minLength: 1, maxLength: 200 },
+              description: { type: "string", maxLength: 1000 },
+              price: { type: "number", format: "float", minimum: 0 },
+              category: { type: "string", minLength: 1 },
+              stock_quantity: { type: "integer", minimum: 0 },
+              images: { type: "array", items: { type: "string", format: "uri" } }
+            }
+          },
+          LoginRequest: {
+            type: "object",
+            required: ["email", "password"],
+            properties: {
+              email: { type: "string", format: "email", example: "user@example.com" },
+              password: { type: "string", minLength: 6, format: "password", example: "secretpassword" }
+            }
+          },
+          AuthResponse: {
+            type: "object",
+            properties: {
+              access_token: { type: "string", description: "JWT access token" },
+              token_type: { type: "string", example: "Bearer" },
+              expires_in: { type: "integer", description: "Token expiration time in seconds", example: 3600 },
+              user: { "$ref": "#/components/schemas/User" }
+            }
+          },
+          User: {
+            type: "object",
+            properties: {
+              id: { type: "string", format: "uuid" },
+              email: { type: "string", format: "email" },
+              name: { type: "string" },
+              role: { type: "string", enum: ["customer", "admin"] },
+              created_at: { type: "string", format: "date-time" }
+            }
+          },
+          Order: {
+            type: "object",
+            properties: {
+              id: { type: "string", format: "uuid" },
+              user_id: { type: "string", format: "uuid" },
+              status: { type: "string", enum: ["pending", "processing", "shipped", "delivered", "cancelled"] },
+              total: { type: "number", format: "float", minimum: 0 },
+              items: { 
+                type: "array", 
+                items: { "$ref": "#/components/schemas/OrderItem" }
+              },
+              shipping_address: { "$ref": "#/components/schemas/Address" },
+              created_at: { type: "string", format: "date-time" },
+              updated_at: { type: "string", format: "date-time" }
+            }
+          },
+          OrderItem: {
+            type: "object",
+            properties: {
+              product_id: { type: "string", format: "uuid" },
+              quantity: { type: "integer", minimum: 1 },
+              price: { type: "number", format: "float", minimum: 0 }
+            }
+          },
+          OrderCreateRequest: {
+            type: "object",
+            required: ["items", "shipping_address"],
+            properties: {
+              items: { 
+                type: "array", 
+                items: { "$ref": "#/components/schemas/OrderItem" },
+                minItems: 1
+              },
+              shipping_address: { "$ref": "#/components/schemas/Address" }
+            }
+          },
+          Address: {
+            type: "object",
+            required: ["street", "city", "country", "postal_code"],
+            properties: {
+              street: { type: "string", example: "123 Main St" },
+              city: { type: "string", example: "New York" },
+              state: { type: "string", example: "NY" },
+              country: { type: "string", example: "USA" },
+              postal_code: { type: "string", example: "10001" }
+            }
+          },
+          Pagination: {
+            type: "object",
+            properties: {
+              page: { type: "integer", minimum: 1 },
+              limit: { type: "integer", minimum: 1 },
+              total: { type: "integer", minimum: 0 },
+              pages: { type: "integer", minimum: 0 }
+            }
+          },
+          Error: {
+            type: "object",
+            properties: {
+              error: { type: "string", description: "Error message" },
+              code: { type: "string", description: "Error code" },
+              details: { type: "object", description: "Additional error details" }
+            }
+          }
+        }
+      },
+      tags: [
+        { name: "Products", description: "Product management operations" },
+        { name: "Authentication", description: "User authentication endpoints" },
+        { name: "Orders", description: "Order management operations" }
+      ]
+    };
+
+    const yamlContent = `openapi: 3.0.3
+info:
+  title: E-Commerce API
+  description: A comprehensive RESTful API for an e-commerce platform featuring product management, user authentication, order processing, and payment integration.
+  version: 2.1.0
+  contact:
+    name: API Support Team
+    email: api-support@ecommerce.com
+    url: https://ecommerce.com/support
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.ecommerce.com/v2
+    description: Production server
+  - url: https://staging-api.ecommerce.com/v2
+    description: Staging server
+  - url: http://localhost:3000/api/v2
+    description: Development server
+
+paths:
+  /products:
+    get:
+      summary: Get all products
+      description: Retrieve a paginated list of products with optional filtering and sorting capabilities
+      operationId: getProducts
+      tags:
+        - Products
+      parameters:
+        - name: page
+          in: query
+          description: Page number for pagination
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Number of products per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: category
+          in: query
+          description: Filter by product category
+          schema:
+            type: string
+        - name: sort
+          in: query
+          description: Sort products by field
+          schema:
+            type: string
+            enum: [name, price, created_at, rating]
+      responses:
+        '200':
+          description: Successful response with product list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  products:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '400':
+          description: Bad request - invalid parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Create a new product
+      description: Add a new product to the catalog (requires admin privileges)
+      operationId: createProduct
+      tags:
+        - Products
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductCreateRequest'
+      responses:
+        '201':
+          description: Product created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          description: Invalid request data
+        '401':
+          description: Unauthorized - invalid token
+        '403':
+          description: Forbidden - insufficient privileges
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  
+  schemas:
+    Product:
+      type: object
+      required: [id, name, price, category]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique product identifier
+        name:
+          type: string
+          description: Product name
+          example: Wireless Bluetooth Headphones
+        description:
+          type: string
+          description: Detailed product description
+        price:
+          type: number
+          format: float
+          minimum: 0
+          description: Product price in USD
+          example: 99.99
+        category:
+          type: string
+          description: Product category
+          example: Electronics
+        sku:
+          type: string
+          description: Stock keeping unit
+          example: WBH-001
+        stock_quantity:
+          type: integer
+          minimum: 0
+          description: Available quantity
+          example: 150
+        images:
+          type: array
+          items:
+            type: string
+            format: uri
+          description: Product image URLs
+        rating:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 5
+          description: Average rating
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    ProductCreateRequest:
+      type: object
+      required: [name, price, category]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 1000
+        price:
+          type: number
+          format: float
+          minimum: 0
+        category:
+          type: string
+          minLength: 1
+        sku:
+          type: string
+        stock_quantity:
+          type: integer
+          minimum: 0
+          default: 0
+        images:
+          type: array
+          items:
+            type: string
+            format: uri
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          type: string
+          description: Error code
+        details:
+          type: object
+          description: Additional error details
+
+tags:
+  - name: Products
+    description: Product management operations
+  - name: Authentication
+    description: User authentication endpoints
+  - name: Orders
+    description: Order management operations`;
+
+    console.log('ApiDocViewer: Loading default E-Commerce API spec');
+    setSpec(yamlContent);
+    setParsedSpec(defaultSpec);
+    setActiveTab('viewer');
+  }, []);
+
   const handleSpecLoad = useCallback((newSpec: string, parsed: any) => {
     setSpec(newSpec);
     setParsedSpec(parsed);
