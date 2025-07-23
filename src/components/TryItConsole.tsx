@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
-import { Play, Copy, Trash2, Plus, X, Server } from 'lucide-react';
+import { Play, Copy, Trash2, Plus, X, Server, RotateCcw } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 
@@ -56,32 +56,55 @@ export const TryItConsole: React.FC<TryItConsoleProps> = ({ spec, theme = 'dark'
 
   const currentOperation = selectedPath && selectedMethod && paths[selectedPath]?.[selectedMethod];
 
-  // Auto-load request body when operation changes
+  // Auto-load request body when API is selected (not just when method changes)
   useEffect(() => {
     if (currentOperation && ['post', 'put', 'patch'].includes(selectedMethod.toLowerCase())) {
       const requestBodySchema = currentOperation.requestBody?.content?.['application/json']?.schema;
-      if (requestBodySchema && requestBodySchema.example) {
+      
+      // First check for direct example
+      if (requestBodySchema?.example) {
         setRequestBody(JSON.stringify(requestBodySchema.example, null, 2));
-      } else if (requestBodySchema && requestBodySchema.properties) {
-        // Generate sample body from schema
+        return;
+      }
+      
+      // Handle $ref schemas
+      let actualSchema = requestBodySchema;
+      if (requestBodySchema?.$ref && spec?.components?.schemas) {
+        const schemaName = requestBodySchema.$ref.split('/').pop();
+        actualSchema = spec.components.schemas[schemaName];
+      }
+      
+      // Generate sample body from schema properties
+      if (actualSchema?.properties) {
         const sampleBody: any = {};
-        Object.entries(requestBodySchema.properties).forEach(([key, prop]: [string, any]) => {
+        Object.entries(actualSchema.properties).forEach(([key, prop]: [string, any]) => {
           if (prop.example !== undefined) {
             sampleBody[key] = prop.example;
           } else if (prop.type === 'string') {
-            sampleBody[key] = prop.format === 'email' ? 'user@example.com' : 'string';
+            if (prop.format === 'email') sampleBody[key] = 'user@example.com';
+            else if (prop.format === 'uuid') sampleBody[key] = '123e4567-e89b-12d3-a456-426614174000';
+            else if (prop.format === 'date-time') sampleBody[key] = new Date().toISOString();
+            else if (prop.format === 'uri') sampleBody[key] = 'https://example.com/image.jpg';
+            else if (prop.enum) sampleBody[key] = prop.enum[0];
+            else sampleBody[key] = prop.minLength ? 'sample text' : 'string';
           } else if (prop.type === 'number' || prop.type === 'integer') {
-            sampleBody[key] = 0;
+            sampleBody[key] = prop.minimum || prop.example || (prop.type === 'integer' ? 1 : 1.0);
           } else if (prop.type === 'boolean') {
             sampleBody[key] = true;
+          } else if (prop.type === 'array') {
+            sampleBody[key] = [];
+          } else if (prop.type === 'object') {
+            sampleBody[key] = {};
           } else {
             sampleBody[key] = null;
           }
         });
         setRequestBody(JSON.stringify(sampleBody, null, 2));
       }
+    } else if (!['post', 'put', 'patch'].includes(selectedMethod.toLowerCase())) {
+      setRequestBody('');
     }
-  }, [currentOperation, selectedMethod]);
+  }, [selectedPath, selectedMethod, currentOperation, spec]);
 
   const getMethodColor = (method: string) => {
     switch (method.toLowerCase()) {
@@ -240,6 +263,19 @@ export const TryItConsole: React.FC<TryItConsoleProps> = ({ spec, theme = 'dark'
     setResponse(null);
   }, []);
 
+  const resetApi = useCallback(() => {
+    setSelectedServer('');
+    setSelectedPath('');
+    setSelectedMethod('');
+    setParameters([]);
+    setRequestBody('');
+    setResponse(null);
+    toast({
+      title: "API Reset",
+      description: "All selections and data have been cleared",
+    });
+  }, [toast]);
+
   if (!spec) {
     return (
       <CardContent className="h-full flex items-center justify-center">
@@ -258,21 +294,33 @@ export const TryItConsole: React.FC<TryItConsoleProps> = ({ spec, theme = 'dark'
       <CardHeader className="flex-shrink-0 border-b border-border">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg">API Testing Console</CardTitle>
-          <div className="flex items-center gap-2">
-            <Switch 
-              id="mock-server" 
-              checked={mockServerEnabled} 
-              onCheckedChange={setMockServerEnabled}
-            />
-            <Label htmlFor="mock-server" className="flex items-center gap-2 text-sm font-medium">
-              <Server className="h-4 w-4" />
-              Mock Server
-            </Label>
-            {mockServerEnabled && (
-              <Badge variant="secondary" className="text-xs">
-                Active
-              </Badge>
-            )}
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={resetApi}
+              className="flex items-center gap-2"
+              title="Reset API Selection"
+            >
+              <RotateCcw className="h-4 w-4" />
+              Reset
+            </Button>
+            <div className="flex items-center gap-2">
+              <Switch 
+                id="mock-server" 
+                checked={mockServerEnabled} 
+                onCheckedChange={setMockServerEnabled}
+              />
+              <Label htmlFor="mock-server" className="flex items-center gap-2 text-sm font-medium">
+                <Server className="h-4 w-4" />
+                Mock Server
+              </Label>
+              {mockServerEnabled && (
+                <Badge variant="secondary" className="text-xs">
+                  Active
+                </Badge>
+              )}
+            </div>
           </div>
         </div>
         {mockServerEnabled && (

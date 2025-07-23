@@ -17,7 +17,7 @@ import { FileUpload } from './FileUpload';
 import { YamlEditor } from './YamlEditor';
 import { TryItConsole } from './TryItConsole';
 import { RedocViewer } from './RedocViewer';
-import { Upload, FileText, Play, Settings, Sun, Moon, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Upload, FileText, Play, Settings, ChevronLeft, ChevronRight, PanelRightClose, PanelRightOpen } from 'lucide-react';
 
 interface ApiDocViewerProps {}
 
@@ -27,6 +27,7 @@ export const ApiDocViewer: React.FC<ApiDocViewerProps> = () => {
   const [activeTab, setActiveTab] = useState('upload');
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [editorCollapsed, setEditorCollapsed] = useState(false);
 
   // Load default sample spec on component mount
   React.useEffect(() => {
@@ -854,36 +855,7 @@ tags:
 
           {/* Settings Section */}
           <div className="p-4 border-t border-border">
-            <Drawer>
-              <DrawerTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  className={`w-full ${sidebarCollapsed ? 'justify-center px-2' : 'justify-start gap-2'} hover-scale`}
-                  title={sidebarCollapsed ? "Settings" : ""}
-                >
-                  <Settings className="h-4 w-4" />
-                  {!sidebarCollapsed && "Settings"}
-                </Button>
-              </DrawerTrigger>
-              <DrawerContent>
-                <DrawerHeader>
-                  <DrawerTitle>Settings</DrawerTitle>
-                </DrawerHeader>
-                <div className="p-6 space-y-4">
-                  <div className="flex items-center space-x-2">
-                    <Switch 
-                      id="theme-toggle" 
-                      checked={theme === 'light'} 
-                      onCheckedChange={(checked) => setTheme(checked ? 'light' : 'dark')}
-                    />
-                    <Label htmlFor="theme-toggle" className="flex items-center gap-2 text-sm font-medium">
-                      {theme === 'light' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-                      {theme === 'light' ? 'Light' : 'Dark'} Theme
-                    </Label>
-                  </div>
-                </div>
-              </DrawerContent>
-            </Drawer>
+            {/* Removed theme toggler as requested */}
           </div>
         </div>
 
@@ -906,14 +878,26 @@ tags:
             </TabsContent>
 
             <TabsContent value="editor" className="m-0 h-full">
-              <div className="grid grid-cols-2 h-full">
-                <div className="border-r border-border">
-                  <YamlEditor 
-                    value={spec} 
-                    onChange={handleSpecChange}
-                  />
-                </div>
-                <div className="relative">
+              <div className="flex h-full">
+                {!editorCollapsed && (
+                  <div className="w-1/2 border-r border-border">
+                    <YamlEditor 
+                      value={spec} 
+                      onChange={handleSpecChange}
+                    />
+                  </div>
+                )}
+                <div className={`relative ${editorCollapsed ? 'flex-1' : 'w-1/2'} transition-all duration-300`}>
+                  {/* Editor Toggle Button */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setEditorCollapsed(!editorCollapsed)}
+                    className="absolute top-4 right-4 z-10 bg-background/80 backdrop-blur-sm"
+                    title={editorCollapsed ? "Show Editor" : "Hide Editor"}
+                  >
+                    {editorCollapsed ? <PanelRightOpen className="h-4 w-4" /> : <PanelRightClose className="h-4 w-4" />}
+                  </Button>
                   <RedocViewer 
                     spec={parsedSpec} 
                     theme={theme}
