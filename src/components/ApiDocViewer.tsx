@@ -2,14 +2,10 @@ import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
 import { 
   Drawer,
   DrawerContent,
   DrawerTrigger,
-  DrawerClose,
   DrawerHeader,
   DrawerTitle
 } from '@/components/ui/drawer';
@@ -17,7 +13,7 @@ import { FileUpload } from './FileUpload';
 import { YamlEditor } from './YamlEditor';
 import { TryItConsole } from './TryItConsole';
 import { RedocViewer } from './RedocViewer';
-import { Upload, FileText, Play, Settings, ChevronLeft, ChevronRight, PanelRightClose, PanelRightOpen } from 'lucide-react';
+import { Upload, FileText, Play, Settings, ChevronLeft, ChevronRight, PanelRightClose, PanelRightOpen, Menu } from 'lucide-react';
 
 interface ApiDocViewerProps {}
 
@@ -28,6 +24,7 @@ export const ApiDocViewer: React.FC<ApiDocViewerProps> = () => {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [editorCollapsed, setEditorCollapsed] = useState(false);
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
   // Load default sample spec on component mount
   React.useEffect(() => {
@@ -755,7 +752,6 @@ tags:
     console.log('ApiDocViewer: Loading default E-Commerce API spec');
     setSpec(yamlContent);
     setParsedSpec(defaultSpec);
-    setActiveTab('viewer');
   }, []);
 
   const handleSpecLoad = useCallback((newSpec: string, parsed: any) => {
@@ -784,14 +780,60 @@ tags:
                 <p className="text-sm text-muted-foreground">Professional API Documentation Platform</p>
               </div>
             </div>
+
+            {/* Mobile Menu */}
+            <div className="md:hidden">
+              <Drawer open={mobileDrawerOpen} onOpenChange={setMobileDrawerOpen}>
+                <DrawerTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </DrawerTrigger>
+                <DrawerContent className="pb-4">
+                  <DrawerHeader className="text-left">
+                    <DrawerTitle>Navigation</DrawerTitle>
+                  </DrawerHeader>
+                  <div className="px-4">
+                    <Tabs
+                      value={activeTab}
+                      onValueChange={(v) => {
+                        setActiveTab(v)
+                        setMobileDrawerOpen(false)
+                      }}
+                      orientation="vertical"
+                      className="w-full"
+                    >
+                      <TabsList className="grid w-full grid-cols-1 gap-2 bg-transparent p-0">
+                        <TabsTrigger value="upload" className="w-full justify-start gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                          <Upload className="h-4 w-4" />
+                          Load Spec
+                        </TabsTrigger>
+                        <TabsTrigger value="viewer" disabled={!parsedSpec} className="w-full justify-start gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                          <FileText className="h-4 w-4" />
+                          Documentation
+                        </TabsTrigger>
+                        <TabsTrigger value="editor" disabled={!spec} className="w-full justify-start gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                          <FileText className="h-4 w-4" />
+                          Editor
+                        </TabsTrigger>
+                        <TabsTrigger value="tryit" disabled={!parsedSpec} className="w-full justify-start gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                          <Play className="h-4 w-4" />
+                          Try It
+                        </TabsTrigger>
+                      </TabsList>
+                    </Tabs>
+                  </div>
+                </DrawerContent>
+              </Drawer>
+            </div>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <div className="flex h-[calc(100vh-80px)]">
+      <div className="flex h-[calc(100vh-80px)] flex-col md:flex-row">
         {/* Sidebar */}
-        <div className={`${sidebarCollapsed ? 'w-16' : 'w-64'} border-r border-border bg-card/30 transition-all duration-300 ease-in-out animate-slide-in-right flex flex-col`}>
+        <div className={`${sidebarCollapsed ? 'w-16' : 'w-64'} border-r border-border bg-card/30 transition-all duration-300 ease-in-out animate-slide-in-right flex flex-col hidden md:flex`}> 
           {/* Sidebar Header with Toggle */}
           <div className="p-4 border-b border-border flex items-center justify-between">
             {!sidebarCollapsed && (
