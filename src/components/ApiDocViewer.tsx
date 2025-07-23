@@ -789,7 +789,7 @@ tags:
                     <Menu className="h-5 w-5" />
                   </Button>
                 </DrawerTrigger>
-                <DrawerContent className="pb-4">
+                <DrawerContent className="pb-4 max-h-[calc(100vh-80px)] overflow-y-auto">
                   <DrawerHeader className="text-left">
                     <DrawerTitle>Navigation</DrawerTitle>
                   </DrawerHeader>
