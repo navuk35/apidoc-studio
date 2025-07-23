@@ -1016,40 +1016,41 @@ tags:
             </TabsContent>
 
             <TabsContent value="editor" className="m-0 h-full">
-              <div className="flex flex-1 overflow-hidden">
-                <div className={`${editorCollapsed ? 'w-0 overflow-hidden' : 'w-1/2'} border-r border-border transition-all duration-300 ease-in-out`}>
-                  <YamlEditor 
-                    value={spec} 
-                    onChange={handleSpecChange}
-                  />
+              <div className="flex flex-1 overflow-hidden relative">
+                {/* Toggle Editor Button - Always visible */}
+                <div
+                  className="absolute z-10"
+                  style={{ top: '1rem', left: editorCollapsed ? '1rem' : 'calc(50% - 2rem)' }}
+                >
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setEditorCollapsed(!editorCollapsed)}
+                    className="flex items-center gap-2 bg-background/80 backdrop-blur-sm border-border/50"
+                    title={editorCollapsed ? 'Show Editor' : 'Hide Editor'}
+                  >
+                    {editorCollapsed ? (
+                      <>
+                        <PanelRightOpen className="h-4 w-4" />
+                        Show Editor
+                      </>
+                    ) : (
+                      <>
+                        <PanelRightClose className="h-4 w-4" />
+                        Hide Editor
+                      </>
+                    )}
+                  </Button>
                 </div>
-                <div className={`${editorCollapsed ? 'w-full' : 'w-1/2'} transition-all duration-300 ease-in-out overflow-hidden relative`}>
-                  {/* Toggle Editor Button - Always visible */}
-                  <div className="absolute top-4 right-4 z-10">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setEditorCollapsed(!editorCollapsed)}
-                      className="flex items-center gap-2 bg-background/80 backdrop-blur-sm border-border/50"
-                      title={editorCollapsed ? "Show Editor" : "Hide Editor"}
-                    >
-                      {editorCollapsed ? (
-                        <>
-                          <PanelRightOpen className="h-4 w-4" />
-                          Show Editor
-                        </>
-                      ) : (
-                        <>
-                          <PanelRightClose className="h-4 w-4" />
-                          Hide Editor
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                  <RedocViewer 
-                    spec={parsedSpec} 
-                    theme={theme}
-                  />
+                <div
+                  className={`${editorCollapsed ? 'w-0 overflow-hidden' : 'w-1/2'} border-r border-border transition-all duration-300 ease-in-out`}
+                >
+                  <YamlEditor value={spec} onChange={handleSpecChange} />
+                </div>
+                <div
+                  className={`${editorCollapsed ? 'w-full' : 'w-1/2'} transition-all duration-300 ease-in-out overflow-y-auto`}
+                >
+                  <RedocViewer spec={parsedSpec} theme={theme} />
                 </div>
               </div>
             </TabsContent>
