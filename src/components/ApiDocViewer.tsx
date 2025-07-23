@@ -41,6 +41,8 @@ export const ApiDocViewer: React.FC<ApiDocViewerProps> = () => {
 
   // Load default sample spec on component mount
   React.useEffect(() => {
+    if (specs.length > 0) return; // Don't reload if specs already exist
+    
     const defaultSpec = {
       openapi: "3.0.3",
       info: {
@@ -771,6 +773,10 @@ tags:
     };
     setSpecs([defaultSpecObj]);
     setSelectedSpecId('default-ecommerce');
+    // Small delay to ensure state updates are processed
+    setTimeout(() => {
+      setActiveTab('viewer');
+    }, 100);
   }, []);
 
   const handleSpecLoad = useCallback((newSpec: string, parsed: any) => {
@@ -956,34 +962,35 @@ tags:
                 </div>
                 
                 {specs.length > 0 && (
-                  <Select value={selectedSpecId} onValueChange={setSelectedSpecId}>
-                    <SelectTrigger className="w-full text-xs">
-                      <SelectValue placeholder="Select API spec" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {specs.map((spec) => (
-                        <SelectItem key={spec.id} value={spec.id}>
-                          <div className="flex items-center justify-between w-full">
-                            <span className="truncate max-w-[150px]">{spec.name}</span>
-                            {specs.length > 1 && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleRemoveSpec(spec.id);
-                                }}
-                                className="h-4 w-4 p-0 ml-2 hover:bg-destructive hover:text-destructive-foreground"
-                                title="Remove spec"
-                              >
-                                <X className="h-2 w-2" />
-                              </Button>
-                            )}
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="space-y-2">
+                    <Select value={selectedSpecId} onValueChange={setSelectedSpecId}>
+                      <SelectTrigger className="w-full text-xs">
+                        <SelectValue placeholder="Select API spec" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {specs.map((spec) => (
+                          <SelectItem key={spec.id} value={spec.id}>
+                            <span className="truncate">{spec.name}</span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    
+                    {specs.length > 1 && selectedSpecId && (
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span>Current: {specs.find(s => s.id === selectedSpecId)?.name}</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemoveSpec(selectedSpecId)}
+                          className="h-6 w-6 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                          title="Remove current spec"
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                 )}
                 
                 {specs.length === 0 && (
@@ -1030,38 +1037,45 @@ tags:
             </TabsContent>
 
             <TabsContent value="editor" className="m-0 h-full">
-              <div className="flex h-full relative">
-                <div className={`${editorCollapsed ? 'w-0 overflow-hidden' : 'w-1/2'} border-r border-border transition-all duration-300 ease-in-out`}>
-                  <YamlEditor 
-                    value={spec} 
-                    onChange={handleSpecChange}
-                  />
-                </div>
-                <div className={`${editorCollapsed ? 'w-full' : 'w-1/2'} relative transition-all duration-300 ease-in-out`}>
-                  {/* Editor Toggle Button */}
+              <div className="flex flex-col h-full">
+                {/* Editor Controls */}
+                <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-card/50">
+                  <h3 className="font-medium text-sm">API Editor</h3>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => setEditorCollapsed(!editorCollapsed)}
-                    className="absolute top-4 right-4 z-10 bg-background/90 backdrop-blur-sm border shadow-lg hover:bg-background"
+                    className="flex items-center gap-2"
                     title={editorCollapsed ? "Show Editor" : "Hide Editor"}
                   >
                     {editorCollapsed ? (
                       <>
-                        <PanelRightOpen className="h-4 w-4 mr-1" />
+                        <PanelRightOpen className="h-4 w-4" />
                         Show Editor
                       </>
                     ) : (
                       <>
-                        <PanelRightClose className="h-4 w-4 mr-1" />
+                        <PanelRightClose className="h-4 w-4" />
                         Hide Editor
                       </>
                     )}
                   </Button>
-                  <RedocViewer 
-                    spec={parsedSpec} 
-                    theme={theme}
-                  />
+                </div>
+                
+                {/* Editor Content */}
+                <div className="flex flex-1 overflow-hidden">
+                  <div className={`${editorCollapsed ? 'w-0 overflow-hidden' : 'w-1/2'} border-r border-border transition-all duration-300 ease-in-out`}>
+                    <YamlEditor 
+                      value={spec} 
+                      onChange={handleSpecChange}
+                    />
+                  </div>
+                  <div className={`${editorCollapsed ? 'w-full' : 'w-1/2'} transition-all duration-300 ease-in-out overflow-hidden`}>
+                    <RedocViewer 
+                      spec={parsedSpec} 
+                      theme={theme}
+                    />
+                  </div>
                 </div>
               </div>
             </TabsContent>

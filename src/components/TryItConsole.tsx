@@ -377,19 +377,33 @@ export const TryItConsole: React.FC<TryItConsoleProps> = ({ spec, theme = 'dark'
               <div className="space-y-4">
                 {/* Server Selection */}
                 <div className="space-y-2">
-                  <Label>Server</Label>
-                  <Select value={selectedServer} onValueChange={setSelectedServer}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select server" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {servers.map((server: any, index: number) => (
-                        <SelectItem key={index} value={server.url}>
-                          {server.url} {server.description && `(${server.description})`}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Label>Server URL</Label>
+                  <Input
+                    value={selectedServer}
+                    onChange={(e) => setSelectedServer(e.target.value)}
+                    placeholder={mockServerEnabled ? "Mock server active" : "Enter server URL (e.g., https://api.example.com)"}
+                    disabled={mockServerEnabled}
+                    className={mockServerEnabled ? "opacity-60" : ""}
+                  />
+                  {!mockServerEnabled && servers.length > 0 && (
+                    <div className="text-xs text-muted-foreground">
+                      <p className="mb-1">Suggested servers:</p>
+                      <div className="flex flex-wrap gap-1">
+                        {servers.map((server: any, index: number) => (
+                          <Button
+                            key={index}
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setSelectedServer(server.url)}
+                            className="h-6 px-2 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                            title={server.description || server.url}
+                          >
+                            {server.url}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Path Selection */}
