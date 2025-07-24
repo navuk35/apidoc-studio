@@ -13,6 +13,7 @@ import { FileUpload } from './FileUpload';
 import { YamlEditor } from './YamlEditor';
 import { TryItConsole } from './TryItConsole';
 import { RedocViewer } from './RedocViewer';
+import { OnboardingTutorial } from './OnboardingTutorial';
 import { Upload, FileText, Play, Settings, ChevronLeft, ChevronRight, PanelRightClose, PanelRightOpen, Menu, Plus, X } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -33,6 +34,25 @@ export const ApiDocViewer: React.FC<ApiDocViewerProps> = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [editorCollapsed, setEditorCollapsed] = useState(false);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(true);
+
+  // Check if user has seen onboarding before
+  React.useEffect(() => {
+    const hasSeenOnboarding = localStorage.getItem('apiDocViewer_hasSeenOnboarding');
+    if (hasSeenOnboarding === 'true') {
+      setShowOnboarding(false);
+    }
+  }, []);
+
+  const handleOnboardingComplete = () => {
+    localStorage.setItem('apiDocViewer_hasSeenOnboarding', 'true');
+    setShowOnboarding(false);
+  };
+
+  const handleOnboardingSkip = () => {
+    localStorage.setItem('apiDocViewer_hasSeenOnboarding', 'true');
+    setShowOnboarding(false);
+  };
 
   // Get currently selected spec
   const currentSpec = specs.find(spec => spec.id === selectedSpecId);
@@ -813,6 +833,13 @@ tags:
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      {/* Onboarding Tutorial */}
+      {showOnboarding && (
+        <OnboardingTutorial 
+          onComplete={handleOnboardingComplete}
+          onSkip={handleOnboardingSkip}
+        />
+      )}
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm">
         <div className="container mx-auto px-6 py-4">
