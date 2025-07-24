@@ -16,6 +16,7 @@ export const RedocViewer: React.FC<RedocViewerProps> = ({ spec, theme = 'dark' }
   const containerRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const currentSpecRef = useRef<any>(null);
 
   useEffect(() => {
     if (!spec || !containerRef.current) {
@@ -23,10 +24,20 @@ export const RedocViewer: React.FC<RedocViewerProps> = ({ spec, theme = 'dark' }
       return;
     }
 
+    // Don't reload if it's the same spec
+    if (currentSpecRef.current === spec) {
+      console.log('RedocViewer: Same spec, skipping reload');
+      return;
+    }
+
+    currentSpecRef.current = spec;
     setIsLoading(true);
     setError(null);
     console.log('RedocViewer: Starting to load Redoc for spec:', spec?.info?.title || 'Unknown API');
 
+    // Store container reference to prevent it from being lost
+    const container = containerRef.current;
+    
     const loadAndRenderRedoc = async () => {
       try {
         // Check if Redoc is already loaded
@@ -69,20 +80,21 @@ export const RedocViewer: React.FC<RedocViewerProps> = ({ spec, theme = 'dark' }
           console.log('RedocViewer: Redoc already loaded');
         }
 
-        if (!containerRef.current) {
-          console.log('RedocViewer: Container ref lost during loading');
+        // Use stored container reference instead of checking ref again
+        if (!container) {
+          console.log('RedocViewer: Container lost during loading');
           return;
         }
 
         // Clear container
-        containerRef.current.innerHTML = '';
+        container.innerHTML = '';
 
         // Create a div for Redoc
         const redocDiv = document.createElement('div');
         redocDiv.id = `redoc-container-${Date.now()}`;
         redocDiv.style.height = '100%';
         redocDiv.style.zIndex = '1';
-        containerRef.current.appendChild(redocDiv);
+        container.appendChild(redocDiv);
 
         console.log('RedocViewer: Initializing Redoc with spec');
 
@@ -161,9 +173,9 @@ export const RedocViewer: React.FC<RedocViewerProps> = ({ spec, theme = 'dark' }
         setError(error instanceof Error ? error.message : 'Failed to load documentation');
         setIsLoading(false);
 
-        // Show a fallback simple documentation view
-        if (containerRef.current) {
-          containerRef.current.innerHTML = `
+        // Show a fallback simple documentation view using stored container
+        if (container) {
+          container.innerHTML = `
             <div style="padding: 2rem; color: #F3F4F6; background: #1F2937; height: 100%; overflow-y: auto;">
               <h1 style="color: #3B82F6; margin-bottom: 1rem;">${spec?.info?.title || 'API Documentation'}</h1>
               <p style="margin-bottom: 1rem; color: #9CA3AF;">Version: ${spec?.info?.version || 'Unknown'}</p>
@@ -191,8 +203,8 @@ export const RedocViewer: React.FC<RedocViewerProps> = ({ spec, theme = 'dark' }
     loadAndRenderRedoc();
 
     return () => {
-      if (containerRef.current) {
-        containerRef.current.innerHTML = '';
+      if (container) {
+        container.innerHTML = '';
       }
     };
   }, [spec, theme]);
