@@ -106,171 +106,6 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onSpecLoad }) => {
     }
   }, [url, parseSpec, onSpecLoad, toast]);
 
-  const loadSampleSpec = useCallback(() => {
-    const sampleSpec = {
-      openapi: "3.0.0",
-      info: {
-        title: "Sample Pet Store API",
-        description: "A sample API that uses a petstore as an example to demonstrate features in the OpenAPI 3.0 specification",
-        version: "1.0.0",
-        contact: {
-          name: "Swagger API Team"
-        },
-        license: {
-          name: "MIT"
-        }
-      },
-      servers: [
-        {
-          url: "https://petstore3.swagger.io/api/v3"
-        }
-      ],
-      paths: {
-        "/pet": {
-          post: {
-            summary: "Add a new pet to the store",
-            description: "Add a new pet to the store",
-            operationId: "addPet",
-            requestBody: {
-              description: "Create a new pet in the store",
-              content: {
-                "application/json": {
-                  schema: {
-                    "$ref": "#/components/schemas/Pet"
-                  }
-                }
-              },
-              required: true
-            },
-            responses: {
-              "200": {
-                description: "Successful operation",
-                content: {
-                  "application/json": {
-                    schema: {
-                      "$ref": "#/components/schemas/Pet"
-                    }
-                  }
-                }
-              },
-              "405": {
-                description: "Invalid input"
-              }
-            }
-          }
-        },
-        "/pet/{petId}": {
-          get: {
-            summary: "Find pet by ID",
-            description: "Returns a single pet",
-            operationId: "getPetById",
-            parameters: [
-              {
-                name: "petId",
-                in: "path",
-                description: "ID of pet to return",
-                required: true,
-                schema: {
-                  type: "integer",
-                  format: "int64"
-                }
-              }
-            ],
-            responses: {
-              "200": {
-                description: "successful operation",
-                content: {
-                  "application/json": {
-                    schema: {
-                      "$ref": "#/components/schemas/Pet"
-                    }
-                  }
-                }
-              },
-              "400": {
-                description: "Invalid ID supplied"
-              },
-              "404": {
-                description: "Pet not found"
-              }
-            }
-          }
-        }
-      },
-      components: {
-        schemas: {
-          Pet: {
-            required: ["name", "photoUrls"],
-            type: "object",
-            properties: {
-              id: {
-                type: "integer",
-                format: "int64",
-                example: 10
-              },
-              name: {
-                type: "string",
-                example: "doggie"
-              },
-              category: {
-                "$ref": "#/components/schemas/Category"
-              },
-              photoUrls: {
-                type: "array",
-                items: {
-                  type: "string"
-                }
-              },
-              tags: {
-                type: "array",
-                items: {
-                  "$ref": "#/components/schemas/Tag"
-                }
-              },
-              status: {
-                type: "string",
-                description: "pet status in the store",
-                enum: ["available", "pending", "sold"]
-              }
-            }
-          },
-          Category: {
-            type: "object",
-            properties: {
-              id: {
-                type: "integer",
-                format: "int64",
-                example: 1
-              },
-              name: {
-                type: "string",
-                example: "Dogs"
-              }
-            }
-          },
-          Tag: {
-            type: "object",
-            properties: {
-              id: {
-                type: "integer",
-                format: "int64"
-              },
-              name: {
-                type: "string"
-              }
-            }
-          }
-        }
-      }
-    };
-
-    const yamlContent = yaml.dump(sampleSpec);
-    onSpecLoad(yamlContent, sampleSpec);
-    toast({
-      title: "Success",
-      description: "Loaded sample Pet Store API specification.",
-    });
-  }, [onSpecLoad, toast]);
 
   return (
     <CardContent className="p-6 h-full">
@@ -278,15 +113,14 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onSpecLoad }) => {
         <div className="text-center space-y-2">
           <h3 className="text-lg font-semibold">Load OpenAPI Specification</h3>
           <p className="text-sm text-muted-foreground">
-            Upload a file, load from URL, or try the sample specification
+            Upload a file or load from URL
           </p>
         </div>
 
         <Tabs defaultValue="file" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="file">Upload File</TabsTrigger>
             <TabsTrigger value="url">From URL</TabsTrigger>
-            <TabsTrigger value="sample">Sample</TabsTrigger>
           </TabsList>
 
           <TabsContent value="file" className="space-y-4">
@@ -330,19 +164,6 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onSpecLoad }) => {
             </div>
           </TabsContent>
 
-          <TabsContent value="sample" className="space-y-4">
-            <div className="text-center space-y-4">
-              <div className="p-4 bg-muted rounded-lg">
-                <FileText className="h-8 w-8 mx-auto text-primary mb-2" />
-                <p className="text-sm">
-                  Try our sample Pet Store API to explore the features
-                </p>
-              </div>
-              <Button onClick={loadSampleSpec} className="w-full">
-                Load Sample Specification
-              </Button>
-            </div>
-          </TabsContent>
         </Tabs>
 
         <div className="bg-muted/50 rounded-lg p-4 text-sm">
