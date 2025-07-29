@@ -1,7 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Drawer,
   DrawerContent,
@@ -14,7 +13,8 @@ import { YamlEditor } from './YamlEditor';
 import { TryItConsole } from './TryItConsole';
 import { RedocViewer } from './RedocViewer';
 import { OnboardingTutorial } from './OnboardingTutorial';
-import { Upload, FileText, Play, Settings, ChevronLeft, ChevronRight, PanelRightClose, PanelRightOpen, Menu, Plus, X } from 'lucide-react';
+import { NavigationTabs } from './NavigationTabs';
+import { Settings, ChevronLeft, ChevronRight, PanelRightClose, PanelRightOpen, Menu, Plus, X, FileText } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface ApiSpec {
@@ -831,6 +831,77 @@ tags:
     });
   }, [selectedSpecId]);
 
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'upload':
+        return (
+          <Card className="h-full">
+            <FileUpload onSpecLoad={handleSpecLoad} />
+          </Card>
+        );
+      
+      case 'viewer':
+        return (
+          <div className="h-full mx-4 my-4">
+            <RedocViewer 
+              spec={parsedSpec} 
+              theme={theme}
+            />
+          </div>
+        );
+      
+      case 'editor':
+        return (
+          <div className="flex flex-col h-full">
+            {/* Hide Editor Control - Above the editor */}
+            <div className="flex items-center justify-end px-4 py-2 border-b border-border bg-card/50">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setEditorCollapsed(!editorCollapsed)}
+                className="flex items-center gap-2"
+                title={editorCollapsed ? "Show Editor" : "Hide Editor"}
+              >
+                {editorCollapsed ? (
+                  <>
+                    <PanelRightOpen className="h-4 w-4" />
+                    Show Editor
+                  </>
+                ) : (
+                  <>
+                    <PanelRightClose className="h-4 w-4" />
+                    Hide Editor
+                  </>
+                )}
+              </Button>
+            </div>
+            
+            {/* Editor Content */}
+            <div className="flex flex-1 overflow-hidden">
+              <div className={`${editorCollapsed ? 'w-0 overflow-hidden' : 'w-1/2'} border-r border-border transition-all duration-300 ease-in-out`}>
+                <YamlEditor 
+                  value={spec} 
+                  onChange={handleSpecChange}
+                />
+              </div>
+              <div className={`${editorCollapsed ? 'w-full' : 'w-1/2'} transition-all duration-300 ease-in-out overflow-hidden`}>
+                <RedocViewer 
+                  spec={parsedSpec} 
+                  theme={theme}
+                />
+              </div>
+            </div>
+          </div>
+        );
+      
+      case 'try-it':
+        return <TryItConsole spec={parsedSpec} theme={theme} />;
+      
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Onboarding Tutorial */}
@@ -840,6 +911,7 @@ tags:
           onSkip={handleOnboardingSkip}
         />
       )}
+      
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm">
         <div className="container mx-auto px-6 py-4">
@@ -854,242 +926,37 @@ tags:
               </div>
             </div>
 
-            {/* Mobile Menu */}
-            <div className="md:hidden">
-              <Drawer open={mobileDrawerOpen} onOpenChange={setMobileDrawerOpen}>
-                <DrawerTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <Menu className="h-5 w-5" />
-                  </Button>
-                </DrawerTrigger>
-                <DrawerContent className="pb-4 max-h-[calc(100vh-80px)] overflow-y-auto">
-                  <DrawerHeader className="text-left">
-                    <DrawerTitle>Navigation</DrawerTitle>
-                  </DrawerHeader>
-                  <div className="px-4">
-                    <Tabs
-                      value={activeTab}
-                      onValueChange={(v) => {
-                        setActiveTab(v)
-                        setMobileDrawerOpen(false)
-                      }}
-                      orientation="vertical"
-                      className="w-full"
-                    >
-                      <TabsList className="grid w-full grid-cols-1 gap-2 bg-transparent p-0">
-                        <TabsTrigger value="upload" className="w-full justify-start gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                          <Upload className="h-4 w-4" />
-                          Load Spec
-                        </TabsTrigger>
-                        <TabsTrigger value="viewer" disabled={!parsedSpec} className="w-full justify-start gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                          <FileText className="h-4 w-4" />
-                          Documentation
-                        </TabsTrigger>
-                        <TabsTrigger value="editor" disabled={!spec} className="w-full justify-start gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                          <FileText className="h-4 w-4" />
-                          Editor
-                        </TabsTrigger>
-                        <TabsTrigger value="tryit" disabled={!parsedSpec} className="w-full justify-start gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                          <Play className="h-4 w-4" />
-                          Try It
-                        </TabsTrigger>
-                      </TabsList>
-                    </Tabs>
-                  </div>
-                </DrawerContent>
-              </Drawer>
+            {/* Settings and theme controls can go here */}
+            <div className="flex items-center gap-2">
+              {specs.length > 0 && (
+                <Select value={selectedSpecId} onValueChange={setSelectedSpecId}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Select API spec" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {specs.map((spec) => (
+                      <SelectItem key={spec.id} value={spec.id}>
+                        <span className="truncate">{spec.name}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
           </div>
         </div>
       </header>
 
+      {/* Navigation Tabs */}
+      <NavigationTabs 
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        hasSpec={!!parsedSpec}
+      />
+
       {/* Main Content */}
-      <div className="flex h-[calc(100vh-80px)] flex-col md:flex-row">
-        {/* Sidebar */}
-        <div className={`${sidebarCollapsed ? 'w-16' : 'w-64'} border-r border-border bg-card/30 transition-all duration-300 ease-in-out animate-slide-in-right flex flex-col hidden md:flex fixed h-[calc(100vh-80px)] z-10`}>
-          {/* Sidebar Header with Toggle */}
-          <div className="p-4 border-b border-border flex items-center justify-between">
-            {!sidebarCollapsed && (
-              <h2 className="font-semibold text-sm">Navigation</h2>
-            )}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="hover-scale"
-            >
-              {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-            </Button>
-          </div>
-
-          {/* Navigation Menu */}
-          <div className="flex-1 p-4">
-            <Tabs value={activeTab} onValueChange={setActiveTab} orientation="vertical" className="w-full">
-              <TabsList className="grid w-full grid-cols-1 gap-2 h-auto bg-transparent p-0">
-                <TabsTrigger 
-                  value="upload" 
-                  className={`w-full ${sidebarCollapsed ? 'justify-center px-2' : 'justify-start gap-2'} data-[state=active]:bg-primary data-[state=active]:text-primary-foreground hover-scale`}
-                  title={sidebarCollapsed ? "Load Spec" : ""}
-                >
-                  <Upload className="h-4 w-4" />
-                  {!sidebarCollapsed && "Load Spec"}
-                </TabsTrigger>
-                
-                <TabsTrigger 
-                  value="viewer" 
-                  className={`w-full ${sidebarCollapsed ? 'justify-center px-2' : 'justify-start gap-2'} data-[state=active]:bg-primary data-[state=active]:text-primary-foreground hover-scale`}
-                  disabled={!parsedSpec}
-                  title={sidebarCollapsed ? "Documentation" : ""}
-                >
-                  <FileText className="h-4 w-4" />
-                  {!sidebarCollapsed && "Documentation"}
-                </TabsTrigger>
-                
-                <TabsTrigger 
-                  value="editor" 
-                  className={`w-full ${sidebarCollapsed ? 'justify-center px-2' : 'justify-start gap-2'} data-[state=active]:bg-primary data-[state=active]:text-primary-foreground hover-scale`}
-                  disabled={!spec}
-                  title={sidebarCollapsed ? "Editor" : ""}
-                >
-                  <FileText className="h-4 w-4" />
-                  {!sidebarCollapsed && "Editor"}
-                </TabsTrigger>
-                
-                <TabsTrigger 
-                  value="tryit" 
-                  className={`w-full ${sidebarCollapsed ? 'justify-center px-2' : 'justify-start gap-2'} data-[state=active]:bg-primary data-[state=active]:text-primary-foreground hover-scale`}
-                  disabled={!parsedSpec}
-                  title={sidebarCollapsed ? "Try It" : ""}
-                >
-                  <Play className="h-4 w-4" />
-                  {!sidebarCollapsed && "Try It"}
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
-
-          {/* API Specs Section */}
-          <div className="p-4 border-t border-border">
-            {!sidebarCollapsed && (
-              <div className="space-y-3">
-                <div className="flex items-center">
-                  <h3 className="font-medium text-sm">API Specs</h3>
-                </div>
-                
-                {specs.length > 0 && (
-                  <div className="space-y-2">
-                    <Select value={selectedSpecId} onValueChange={setSelectedSpecId}>
-                      <SelectTrigger className="w-full text-xs">
-                        <SelectValue placeholder="Select API spec" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {specs.map((spec) => (
-                          <SelectItem key={spec.id} value={spec.id}>
-                            <span className="truncate">{spec.name}</span>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    
-                    {specs.length > 1 && selectedSpecId && (
-                      <div className="flex items-center justify-between text-xs text-muted-foreground">
-                        <span>Current: {specs.find(s => s.id === selectedSpecId)?.name}</span>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleRemoveSpec(selectedSpecId)}
-                          className="h-6 w-6 p-0 hover:bg-destructive hover:text-destructive-foreground"
-                          title="Remove current spec"
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                )}
-                
-                {specs.length === 0 && (
-                  <p className="text-xs text-muted-foreground">No specs loaded</p>
-                )}
-              </div>
-            )}
-            
-            {sidebarCollapsed && specs.length > 0 && (
-              <div className="flex flex-col items-center gap-2">
-                <span className="text-xs text-center font-mono bg-muted px-1 py-0.5 rounded">
-                  {specs.length}
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Main Content Area */}
-        <div className={`flex-1 bg-background animate-fade-in ${sidebarCollapsed ? 'ml-16' : 'ml-64'} transition-all duration-300 ease-in-out`}>
-          <Tabs value={activeTab} className="h-full">
-            <TabsContent value="upload" className="m-0 h-full">
-              <Card className="h-full">
-                <FileUpload onSpecLoad={handleSpecLoad} />
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="viewer" className="m-0 h-full">
-              <div className="h-full mx-4 my-4">
-                <RedocViewer 
-                  spec={parsedSpec} 
-                  theme={theme}
-                />
-              </div>
-            </TabsContent>
-
-            <TabsContent value="editor" className="m-0 h-full">
-              <div className="flex flex-col h-full">
-                {/* Hide Editor Control - Above the editor */}
-                <div className="flex items-center justify-end px-4 py-2 border-b border-border bg-card/50">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setEditorCollapsed(!editorCollapsed)}
-                    className="flex items-center gap-2"
-                    title={editorCollapsed ? "Show Editor" : "Hide Editor"}
-                  >
-                    {editorCollapsed ? (
-                      <>
-                        <PanelRightOpen className="h-4 w-4" />
-                        Show Editor
-                      </>
-                    ) : (
-                      <>
-                        <PanelRightClose className="h-4 w-4" />
-                        Hide Editor
-                      </>
-                    )}
-                  </Button>
-                </div>
-                
-                {/* Editor Content */}
-                <div className="flex flex-1 overflow-hidden">
-                  <div className={`${editorCollapsed ? 'w-0 overflow-hidden' : 'w-1/2'} border-r border-border transition-all duration-300 ease-in-out`}>
-                    <YamlEditor 
-                      value={spec} 
-                      onChange={handleSpecChange}
-                    />
-                  </div>
-                  <div className={`${editorCollapsed ? 'w-full' : 'w-1/2'} transition-all duration-300 ease-in-out overflow-hidden`}>
-                    <RedocViewer 
-                      spec={parsedSpec} 
-                      theme={theme}
-                    />
-                  </div>
-                </div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="tryit" className="m-0 h-full">
-              <TryItConsole spec={parsedSpec} theme={theme} />
-            </TabsContent>
-          </Tabs>
-        </div>
+      <div className="h-[calc(100vh-140px)]">
+        {renderContent()}
       </div>
     </div>
   );
