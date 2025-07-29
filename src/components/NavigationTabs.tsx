@@ -50,8 +50,8 @@ export const NavigationTabs: React.FC<NavigationTabsProps> = ({
 
   return (
     <div className="border-b border-border bg-background">
-      <div className="flex items-center px-6 py-2">
-        <div className="flex items-center space-x-1">
+      <div className="flex items-center justify-center px-6 py-2">
+        <div className="flex items-center space-x-4">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -65,7 +65,7 @@ export const NavigationTabs: React.FC<NavigationTabsProps> = ({
                 disabled={isDisabled}
                 onClick={() => !isDisabled && onTabChange(tab.id)}
                 className={cn(
-                  "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-none border-b-2 border-transparent",
+                  "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md border-b-2 border-transparent",
                   "hover:bg-muted/50 hover:border-muted-foreground/20",
                   isActive && "bg-muted border-primary text-primary",
                   isDisabled && "opacity-50 cursor-not-allowed"
